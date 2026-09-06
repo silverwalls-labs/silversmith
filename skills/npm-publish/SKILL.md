@@ -15,8 +15,9 @@ scripts, `package.json`, or `.npmrc`.
 
 Version floors (verify before anything else): **npm ≥ 11.15.0** and
 **Node ≥ 22.14.0** — required for staged publishing; trusted publishing
-needs npm ≥ 11.5.1. If the project's CI uses older versions, upgrading is
-step zero.
+needs npm ≥ 11.5.1. These are minimums: target the current Node release
+(26 as of late 2026) in the publish workflow. If the project's CI uses
+older versions, upgrading is step zero.
 
 ## Rules
 
@@ -114,7 +115,8 @@ exist and are out of scope; the first item is the boundary between them:
 - [ ] Changelog updated for this version.
 - [ ] Publishing commit is clean and tagged; workflow was triggered by the
       tag, not a branch push.
-- [ ] `engines`/CI use npm ≥ 11.15.0 and Node ≥ 22.14.0.
+- [ ] CI toolchain meets the floors (npm ≥ 11.15.0, Node ≥ 22.14.0) and
+      targets the current Node release.
 
 ## Release-flow review checklist
 

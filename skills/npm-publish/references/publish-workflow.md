@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22
+          node-version: 26 # current release; hard floor is 22.14.0
       - run: npm ci --ignore-scripts
       # project quality gates — your choice, out of scope for this skill
       - run: npm run lint && npm test && npm run build
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22
+          node-version: 26 # current release; hard floor is 22.14.0
       - run: npm install -g npm@^11.15.0 # floor for `npm stage`
       - run: npm ci --ignore-scripts
       - run: npm run build
