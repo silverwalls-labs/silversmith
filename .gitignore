@@ -141,3 +141,20 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# AI tooling
+.claude/
+.cursor/
+.copilot/
+.aider*
+.continue/
+.codeium/
+.windsurf/
+.vibe/
+.mcp/
+.tabnine/
+.deepcode/
+.sourcery/
+.kite/
+GitHubCopilot/
+
