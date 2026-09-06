@@ -16,7 +16,8 @@ dist-tags protect the *default consumer experience*.
 # clean default branch, all gates green locally
 git switch main && git pull && git status   # must be clean
 
-npm version prerelease --preid=beta         # 1.4.0 -> 1.5.0-beta.0, commits + tags
+npm version preminor --preid=beta           # 1.4.0 -> 1.5.0-beta.0, commits + tags
+                                            # (further betas: npm version prerelease)
 git push --follow-tags                      # tag push triggers publish.yml
 ```
 

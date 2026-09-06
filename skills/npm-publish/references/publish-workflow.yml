@@ -43,8 +43,10 @@ jobs:
       - run: npm test
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run build
-      # Ship-list review: fail loudly if the tarball would include secrets,
-      # tests, or anything not in the `files` allowlist.
+      # Ship-list review: prints the exact tarball contents into the job log
+      # for the environment reviewer. NOTE: --dry-run only LISTS files, it
+      # never fails on content — the `files` allowlist plus human review of
+      # this output is the actual gate.
       - run: npm pack --dry-run
 
   publish:
@@ -62,9 +64,10 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
-      # npm >= 11.15.0 required for `npm stage`; update explicitly rather
-      # than relying on the runner image.
-      - run: npm install -g npm@latest
+      # npm >= 11.15.0 required for `npm stage`; install a pinned range
+      # explicitly rather than relying on the runner image (or on a mutable
+      # `npm@latest`). Pin the exact version for full reproducibility.
+      - run: npm install -g npm@^11.15.0
       - run: npm ci --ignore-scripts
       - run: npm run build
       # Trusted publishing: the CLI exchanges the workflow's OIDC token for

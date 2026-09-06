@@ -107,6 +107,8 @@ the workflow):
 - [ ] Lockfile committed; install used `npm ci --ignore-scripts`.
 - [ ] `npm pack --dry-run` output reviewed: only intended files, no
       secrets/tests/`.env`/unintended source maps.
+- [ ] `package.json` `repository.url` matches the repository the workflow
+      runs in — provenance validates this and the publish fails on mismatch.
 - [ ] Version bumped with `npm version`, follows semver for the change set.
 - [ ] Changelog updated for this version.
 - [ ] Publishing commit is clean and tagged; workflow was triggered by the
@@ -145,6 +147,15 @@ migration):
 
 ## Notes and edge cases
 
+- **First publish of a new package:** staged publishing and trusted
+  publishers both require the package to already exist on the registry, so
+  the very first publish is the one sanctioned exception to the no-local
+  rule. Bootstrap: a maintainer with WebAuthn 2FA publishes the initial
+  version from a clean tagged commit (`npm publish`, with
+  `--access public` or `publishConfig.access` for a scoped public
+  package), then *immediately* configures the trusted publisher and sets
+  "Require two-factor authentication and disallow tokens". Every
+  subsequent release follows the normal flow.
 - **Private repositories:** provenance is not available when the source
   repo is private. Everything else here still applies; note the gap in
   the release docs instead of faking it.
