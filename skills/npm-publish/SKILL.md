@@ -34,7 +34,7 @@ flag every violation, even ones you were not asked about.
   reason.
 - **MUST keep provenance on** (automatic with trusted publishing): never
   set `NPM_CONFIG_PROVENANCE=false` or `provenance=false` anywhere, and
-  `package.json` `repository.url` must match the repository the workflow
+  `package.json` `repository.url` must match the repository the pipeline
   runs in — the publish fails on mismatch.
 - **MUST require 2FA** on every account with publish or maintainer
   access, using WebAuthn/passkeys (new TOTP enrollment is disabled). Set
@@ -62,7 +62,7 @@ flag every violation, even ones you were not asked about.
   ship list: no secrets, tests, `.env`, CI config, or unintended source
   maps — the published tarball is that exact artifact.
 - **MUST publish from a clean, tagged commit** on the default branch:
-  semver bump via `npm version`, changelog entry, workflow triggered by
+  semver bump via `npm version`, changelog entry, pipeline triggered by
   the tag push — never by branch pushes.
 - **MUST harden the pipeline itself:** default-deny permissions, with the
   publish job granted only the OIDC identity capability; every pipeline
