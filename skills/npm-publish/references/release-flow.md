@@ -22,7 +22,7 @@ git push --follow-tags                      # tag push triggers publish.yml
 ```
 
 CI runs the gates and ends with `npm stage publish --tag next` via trusted
-publishing (see `publish-workflow.yml`). Then a maintainer:
+publishing (see [publish-workflow.md](publish-workflow.md)). Then a maintainer:
 
 ```sh
 npm stage list                              # -> stage-id for 1.5.0-beta.0

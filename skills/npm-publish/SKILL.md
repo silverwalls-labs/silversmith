@@ -83,7 +83,7 @@ find, even ones you were not asked about.
    (or `premajor`/`prerelease --preid=beta` for a prerelease), update the
    changelog, push the commit and tag: `git push --follow-tags`.
 3. **CI stages the package:** the tag push triggers the workflow
-   (see [references/publish-workflow.yml](references/publish-workflow.yml)),
+   (see [references/publish-workflow.md](references/publish-workflow.md)),
    which runs the gates and ends with `npm stage publish` via OIDC — no
    token anywhere. Prereleases stage with `--tag next`.
 4. **Human approves:** a maintainer reviews the staged tarball
