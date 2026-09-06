@@ -1,4 +1,4 @@
-# Publish workflow — GitHub Actions example
+# Provider setup — GitHub Actions
 
 Minimal correct shape: tag-triggered, OIDC trusted publishing, staged
 publish, **build/publish separation** — the credentialed job never
@@ -79,4 +79,4 @@ jobs:
 | No token anywhere | The npm CLI exchanges the OIDC token itself; provenance is attested automatically |
 
 A green workflow is **not** a release: review, approve, and promote per
-[release-flow.md](release-flow.md).
+[release-flow.md](../release-flow.md).

@@ -22,8 +22,9 @@ Normative. Each MUST/NEVER doubles as a review check: to pre-flight a
 release or review an existing setup, walk this list top to bottom and
 flag every violation, even ones you were not asked about.
 
-- **MUST publish via trusted publishing (OIDC)** from CI (GitHub Actions
-  or GitLab CI). NEVER publish from a local machine, and NEVER keep a
+- **MUST publish via trusted publishing (OIDC)** from a CI provider the
+  registry supports as a trusted publisher (see notes for current
+  support). NEVER publish from a local machine, and NEVER keep a
   registry token in CI — no `NPM_TOKEN`/`NODE_AUTH_TOKEN` secrets, no
   `_authToken` lines in any `.npmrc`. Classic tokens were revoked
   registry-wide on 2025-12-09.
@@ -46,9 +47,10 @@ flag every violation, even ones you were not asked about.
 - **Versions are immutable.** NEVER republish, force-publish, or
   unpublish-then-republish. A fix is a new version plus `npm deprecate`
   on the bad one.
-- **MUST sequence the publish behind the project's quality gates** in the
-  same workflow (`needs:`), none of them `continue-on-error`. Gate
-  contents are the project's choice and out of scope here.
+- **MUST sequence the publish behind the project's quality gates:** the
+  publish job cannot run unless they passed in the same pipeline run, and
+  none of them may be marked to pass on failure. Gate contents are the
+  project's choice and out of scope here.
 - **MUST isolate the publish from code execution.** The build job
   installs (`npm ci --ignore-scripts`, committed lockfile), runs the
   gates, packs, and uploads the tarball artifact; the publish job
@@ -62,23 +64,24 @@ flag every violation, even ones you were not asked about.
 - **MUST publish from a clean, tagged commit** on the default branch:
   semver bump via `npm version`, changelog entry, workflow triggered by
   the tag push — never by branch pushes.
-- **MUST harden the workflow itself:** top-level `permissions: {}`, build
-  job `contents: read`, publish job `id-token: write` only; every action
-  pinned to a full commit SHA; publish job gated by a GitHub Environment
-  with required reviewers.
+- **MUST harden the pipeline itself:** default-deny permissions, with the
+  publish job granted only the OIDC identity capability; every pipeline
+  dependency (actions, orbs, includes) pinned to an immutable revision;
+  publish job gated by an approval environment with required reviewers.
+  Provider-specific setup: [references/providers/](references/providers/).
 
 ## Publish flow
 
 1. **One-time setup:** on npmjs.com, set publishing access to "Require
    two-factor authentication and disallow tokens" and add a trusted
-   publisher (org/user, repository, workflow filename, environment name —
-   keep the stage-publish-only default). On the repo, create that
-   environment with required reviewers; protect `main` and the `v*` tag
-   pattern.
+   publisher (org/user, repository, workflow/pipeline identifier,
+   environment name — keep the stage-publish-only default). On the CI
+   side, create that approval environment with required reviewers;
+   protect the default branch and the `v*` tag pattern.
 2. **Cut the release:** `npm version <patch|minor|major|pre*>`, update the
    changelog, `git push --follow-tags`.
-3. **CI stages the tarball** via the two-job (build → publish) workflow:
-   [references/publish-workflow.md](references/publish-workflow.md).
+3. **CI stages the tarball** via a two-job (build → publish) pipeline —
+   provider setups: [references/providers/](references/providers/).
 4. **Review, approve (2FA), verify, promote** — commands, verification,
    and failure handling:
    [references/release-flow.md](references/release-flow.md).
@@ -93,12 +96,13 @@ flag every violation, even ones you were not asked about.
   package), then immediately applies the one-time setup above.
 - **Private repositories:** provenance is unavailable. Everything else
   still applies — note the gap in the release docs instead of faking it.
-- **Other CI providers:** GitLab CI is the other trusted publisher with
-  full support; same rules. CircleCI has trusted publishing but does not
-  generate provenance attestations — prefer GitHub Actions or GitLab CI.
-  Unsupported CI (Jenkins, Buildkite, self-hosted): use a thin GitHub
-  Actions or GitLab publish job that runs after the main CI builds the
-  artifact.
+- **Provider support (registry-side fact, as of late 2026):** the
+  registry trusts GitHub Actions and GitLab CI with full provenance;
+  CircleCI has trusted publishing but no provenance attestations. For
+  unsupported CI (Jenkins, Buildkite, self-hosted), run a thin publish
+  job on a supported provider after the main CI builds the artifact.
+  Per-provider setup lives in
+  [references/providers/](references/providers/).
 - **Interim token fallback / migration:** if a token is truly unavoidable,
   use a granular write token (90-day cap, 2FA by default) scoped to the
   single package — and configure the trusted publisher and verify a

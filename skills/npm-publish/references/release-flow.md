@@ -18,11 +18,11 @@ git switch main && git pull && git status   # must be clean
 
 npm version preminor --preid=beta           # 1.4.0 -> 1.5.0-beta.0, commits + tags
                                             # (further betas: npm version prerelease)
-git push --follow-tags                      # tag push triggers publish.yml
+git push --follow-tags                      # tag push triggers the publish pipeline
 ```
 
 CI runs the gates and ends with `npm stage publish --tag next` via trusted
-publishing (see [publish-workflow.md](publish-workflow.md)). Then a maintainer:
+publishing (provider setups: [providers/](providers/)). Then a maintainer:
 
 ```sh
 npm stage list                              # -> stage-id for 1.5.0-beta.0
