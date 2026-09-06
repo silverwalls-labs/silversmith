@@ -63,11 +63,18 @@ find, even ones you were not asked about.
 - **MUST publish from a clean, tagged commit** on the default branch:
   semver bump via `npm version`, changelog entry, annotated tag, workflow
   triggered by the tag push — not by every push to `main`.
+- **MUST isolate the publish from code execution.** Build and publish are
+  separate jobs in the same workflow: the build job installs, runs the
+  gates, packs, and uploads the tarball as an artifact; the publish job
+  (`needs:` the build) downloads and publishes **that tarball only** — it
+  NEVER checks out the repo, installs project dependencies, or runs any
+  project script next to the OIDC credential. Publishing a tarball also
+  runs no lifecycle scripts.
 - **MUST harden the publish workflow itself:** top-level
-  `permissions: {}` with the publish job scoped to `contents: read` +
-  `id-token: write`; every action pinned to a full commit SHA; install
-  with `npm ci --ignore-scripts` from a committed lockfile; publish job
-  gated by a GitHub Environment with required reviewers.
+  `permissions: {}`, build job `contents: read`, publish job
+  `id-token: write` only; every action pinned to a full commit SHA;
+  install with `npm ci --ignore-scripts` from a committed lockfile;
+  publish job gated by a GitHub Environment with required reviewers.
 
 ## Publish flow
 
@@ -84,9 +91,10 @@ find, even ones you were not asked about.
    (or `premajor`/`prerelease --preid=beta` for a prerelease), update the
    changelog, push the commit and tag: `git push --follow-tags`.
 3. **CI stages the package:** the tag push triggers the workflow
-   (see [references/publish-workflow.md](references/publish-workflow.md)),
-   which runs the gates and ends with `npm stage publish` via OIDC — no
-   token anywhere. Prereleases stage with `--tag next`.
+   (see [references/publish-workflow.md](references/publish-workflow.md)):
+   a build job runs the gates and packs the tarball; a separate
+   credentialed job stages that tarball via OIDC — no token anywhere, no
+   project code near the credential. Prereleases stage with `--tag next`.
 4. **Human approves:** a maintainer reviews the staged tarball
    (`npm stage list` / `npm stage view <stage-id>` /
    `npm stage download <stage-id>`), then `npm stage approve <stage-id>`
@@ -107,8 +115,9 @@ exist and are out of scope; the first item is the boundary between them:
 - [ ] Project quality gates passed in the same workflow run, and the
       publish job is `needs:`-sequenced after them.
 - [ ] Lockfile committed; install used `npm ci --ignore-scripts`.
-- [ ] `npm pack --dry-run` output reviewed: only intended files, no
-      secrets/tests/`.env`/unintended source maps.
+- [ ] `npm pack` ship list reviewed: only intended files, no
+      secrets/tests/`.env`/unintended source maps — the published tarball
+      is this exact artifact.
 - [ ] `package.json` `repository.url` matches the repository the workflow
       runs in — provenance validates this and the publish fails on mismatch.
 - [ ] Version bumped with `npm version`, follows semver for the change set.
@@ -135,6 +144,9 @@ migration):
       suppression) is used for install.
 - [ ] Publish job is sequenced (`needs:`) after the project's quality
       gates in the same workflow; none of them are `continue-on-error`.
+- [ ] Publish job executes no project-controlled code: no checkout, no
+      dependency install, no `npm run` — it publishes a tarball artifact
+      produced by the build job.
 - [ ] Publish step is `npm stage publish` (or documented justification for
       direct publish); trust config does not grant `--allow-publish`
       needlessly.
