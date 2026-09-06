@@ -26,8 +26,8 @@ publishing (see [publish-workflow.md](publish-workflow.md)). Then a maintainer:
 
 ```sh
 npm stage list                              # -> stage-id for 1.5.0-beta.0
-npm stage view  <stage-id>                  # metadata: version, integrity, provenance
-npm stage download <stage-id>              # pull the exact tarball
+npm stage view <stage-id>                   # metadata: version, integrity, provenance
+npm stage download <stage-id>               # pull the exact tarball
 tar -tzf acme-widget-1.5.0-beta.0.tgz       # audit contents: files allowlist honored?
 npm stage approve <stage-id>                # 2FA prompt -> version goes live on `next`
 ```

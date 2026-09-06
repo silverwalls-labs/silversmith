@@ -93,7 +93,9 @@ flag every violation, even ones you were not asked about.
   package), then immediately applies the one-time setup above.
 - **Private repositories:** provenance is unavailable. Everything else
   still applies — note the gap in the release docs instead of faking it.
-- **GitLab CI** is the other supported trusted publisher; same rules.
+- **Other CI providers:** GitLab CI is the other trusted publisher with
+  full support; same rules. CircleCI has trusted publishing but does not
+  generate provenance attestations — prefer GitHub Actions or GitLab CI.
   Unsupported CI (Jenkins, Buildkite, self-hosted): use a thin GitHub
   Actions or GitLab publish job that runs after the main CI builds the
   artifact.
