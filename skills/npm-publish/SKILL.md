@@ -7,13 +7,13 @@ description: Secure npm package publishing. Use when setting up, editing, or rev
 
 Enforce current good practices for publishing npm packages: supply-chain
 integrity (trusted publishing, provenance) and a safe release flow (staged
-publish, dist-tag promotion). The scope is the publish itself — project
+publish, dist-tag channels). The scope is the publish itself — project
 quality gates (lint, tests, build, audits) are the project's own concern;
 this skill only requires that the publish is sequenced behind them.
 
 Version floors: **npm ≥ 11.15.0**, **Node ≥ 22.14.0** (staged publishing;
 trusted publishing needs npm ≥ 11.5.1). These are minimums — target the
-current Node release (26 as of late 2026). If the CI toolchain is older,
+current Node release (26 as of 2026-09). If the CI toolchain is older,
 upgrading is step zero.
 
 ## Rules
@@ -41,9 +41,13 @@ flag every violation, even ones you were not asked about.
   the package's publishing access to **"Require two-factor authentication
   and disallow tokens"**.
 - **MUST stage releases through a dist-tag channel:** prereleases under
-  `next`/`beta`; promotion to `latest` is a separate human command
-  (`npm dist-tag add`), never a side effect of CI on a feature branch and
-  never implicit by publishing a prerelease without `--tag`.
+  `next`/`beta`; a stable that does not supersede the current `latest`
+  (a maintenance release of an old major) under an explicit
+  `legacy-<major>` channel — the registry refuses to move `latest`
+  backwards implicitly. Only a superseding stable may target `latest`;
+  hand-moving it (`npm dist-tag add`) is for rollback or a deliberate
+  legacy promotion — never a side effect of CI on a feature branch, and
+  never implicit via a prerelease published without `--tag`.
 - **Versions are immutable.** NEVER republish, force-publish, or
   unpublish-then-republish. A fix is a new version plus `npm deprecate`
   on the bad one.
@@ -75,15 +79,16 @@ flag every violation, even ones you were not asked about.
 1. **One-time setup:** on npmjs.com, set publishing access to "Require
    two-factor authentication and disallow tokens" and add a trusted
    publisher (org/user, repository, workflow/pipeline identifier,
-   environment name — keep the stage-publish-only default). On the CI
-   side, create that approval environment with required reviewers;
-   protect the default branch and the `v*` tag pattern.
+   environment name — allow `npm stage publish` only, not direct
+   `npm publish`). On the CI side, create that approval environment
+   with required reviewers; protect the default branch and the `v*` tag
+   pattern.
 2. **Cut the release:** `npm version <patch|minor|major|pre*>`, update the
    changelog, `git push --follow-tags`.
 3. **CI stages the tarball** via a two-job (build → publish) pipeline —
    provider setups: [references/providers/](references/providers/).
-4. **Review, approve (2FA), verify, promote** — commands, verification,
-   and failure handling:
+4. **Review, approve (2FA), verify** — commands, verification, and
+   failure handling:
    [references/release-flow.md](references/release-flow.md).
 
 ## Notes and edge cases
@@ -96,15 +101,25 @@ flag every violation, even ones you were not asked about.
   package), then immediately applies the one-time setup above.
 - **Private repositories:** provenance is unavailable. Everything else
   still applies — note the gap in the release docs instead of faking it.
-- **Provider support (registry-side fact, as of late 2026):** the
-  registry trusts GitHub Actions and GitLab CI with full provenance;
-  CircleCI has trusted publishing but no provenance attestations. For
-  unsupported CI (Jenkins, Buildkite, self-hosted), run a thin publish
-  job on a supported provider after the main CI builds the artifact.
-  Per-provider setup lives in
+- **Monorepos/workspaces:** `npm stage` is unaware of workspaces. Pack
+  each publishable package separately (`npm pack -w <name>`, one
+  artifact per package) and run one `npm stage publish` per tarball;
+  approve each stage individually. The reference workflow assumes a
+  single-package repository.
+- **Provider support (registry-side fact, as of 2026-09):** this skill
+  covers GitHub Actions and GitLab CI — both trusted with full
+  provenance. GitLab pipelines must expose an `id_tokens` entry with
+  `aud: npm:registry.npmjs.org`. Other CI (Jenkins, Buildkite,
+  self-hosted runners) is not trusted by the registry: run a thin
+  publish job on a supported provider after the main CI builds the
+  artifact. Per-provider setup lives in
   [references/providers/](references/providers/).
-- **Interim token fallback / migration:** if a token is truly unavoidable,
-  use a granular write token (90-day cap, 2FA by default) scoped to the
-  single package — and configure the trusted publisher and verify a
-  staged publish works *before* revoking tokens and tightening access,
-  so the pipeline never goes dark.
+- **Interim token fallback / migration:** a token cannot publish once
+  the "disallow tokens" package setting is applied, so tokens are
+  migration-only and that setting always comes last. If a token is
+  truly unavoidable in the interim, use a granular write token without
+  2FA bypass (90-day cap), scoped to the single package, publishing
+  via `npm stage publish` so the approval gate still applies — and
+  configure the trusted publisher and verify a staged publish works
+  *before* revoking tokens and tightening access, so the pipeline
+  never goes dark.

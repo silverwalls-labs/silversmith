@@ -4,8 +4,9 @@ End-to-end example for `@acme/widget`, combining the two staging layers:
 
 - **Staged publishing** (`npm stage`) — a registry-level approval gate:
   nothing goes live until a maintainer approves with 2FA.
-- **Dist-tag channels** (`next` → `latest`) — a release-channel gate:
-  even a live version isn't the default install until promoted.
+- **Dist-tag channels** (`next`, `legacy-<major>`, `latest`) — a
+  release-channel gate: a live version is not the default install unless
+  it is a superseding stable approved onto `latest`.
 
 They are complementary: `npm stage` protects the *registry write*,
 dist-tags protect the *default consumer experience*.
@@ -21,8 +22,9 @@ npm version preminor --preid=beta           # 1.4.0 -> 1.5.0-beta.0, commits + t
 git push --follow-tags                      # tag push triggers the publish pipeline
 ```
 
-CI runs the gates and ends with `npm stage publish --tag next` via trusted
-publishing (provider setups: [providers/](providers/)). Then a maintainer:
+CI runs the gates, packs, and stages the built tarball under `next` via
+trusted publishing (provider setups: [providers/](providers/)). Then a
+maintainer:
 
 ```sh
 npm stage list                              # -> stage-id for 1.5.0-beta.0
@@ -38,7 +40,8 @@ Verify from a consumer's seat:
 mkdir /tmp/widget-smoke && cd /tmp/widget-smoke && npm init -y
 npm install @acme/widget@next
 node -e "require('@acme/widget')"           # or the package's real smoke test
-npm view @acme/widget --json | jq '.dist.attestations'   # provenance present
+npm view @acme/widget --json | jq '.dist.attestations'   # provenance present —
+                                                          # confirms the tarball handoff kept it
 ```
 
 `latest` still points at 1.4.0 — beta users opt in, nobody else is affected.
@@ -50,19 +53,39 @@ npm version minor                           # 1.5.0, commit + tag v1.5.0
 git push --follow-tags
 ```
 
-CI stages it (no `--tag`, so it targets `latest` on approval). Maintainer
-reviews and approves exactly as above. After the smoke test passes, if the
-release was staged under `next` first, promote explicitly:
+The build job verified that 1.5.0 supersedes the current `latest`, so CI
+stages it under `latest` — the one channel a superseding stable may
+target. Maintainer reviews and approves exactly as above; on approval,
+`latest` moves to 1.5.0. `next` still points at 1.5.0-beta.0 —
+harmless, but you can retire it:
 
 ```sh
-npm dist-tag add @acme/widget@1.5.0 latest
-npm dist-tag ls @acme/widget                # confirm: latest -> 1.5.0, next -> 1.5.0
+npm dist-tag ls @acme/widget                # latest -> 1.5.0, next -> 1.5.0-beta.0
+npm dist-tag rm @acme/widget next           # optional cleanup
 ```
 
-Promotion is a deliberate, human command — never a side effect of CI on a
-feature branch.
+You never promote the beta itself: the stable release is a new version
+through the same flow. `latest` only moves at approval or by a
+deliberate human `npm dist-tag add` (rollback, legacy promotion) —
+never as a side effect of CI on a feature branch.
 
-## 3. When a bad version ships
+## 3. Maintenance release of an old major
+
+Publishing 1.4.1 while `latest` is 2.x: the registry refuses to move
+`latest` backwards, so the pipeline stages it under `legacy-1` (the
+build job derives the channel by comparing the new version against
+`dist-tags.latest`). Review and approve as above; consumers opt in
+explicitly:
+
+```sh
+npm install @acme/widget@legacy-1
+```
+
+Promoting a legacy release to `latest` by hand is possible
+(`npm dist-tag add @acme/widget@1.4.1 latest`) but almost always a
+mistake — `latest` moving backwards breaks consumers.
+
+## 4. When a bad version ships
 
 Published versions are immutable. Never republish, force-publish, or
 unpublish-then-republish. Instead:
@@ -85,7 +108,7 @@ rotate the exposed secrets, reject anything still staged
 maintainer list for tampering, and contact npm support — deletion beyond
 the 72-hour unpublish policy is their call, not a CLI command.
 
-## 4. Reference: stage lifecycle
+## 5. Reference: stage lifecycle
 
 | State | Command | Notes |
 |---|---|---|
@@ -93,8 +116,9 @@ the 72-hour unpublish policy is their call, not a CLI command.
 | List | `npm stage list` | Also visible in the npmjs.com "Staged Packages" tab |
 | Inspect | `npm stage view <id>` / `npm stage download <id>` | Audit the exact bytes |
 | Approve | `npm stage approve <id>` | 2FA required; version goes live |
-| Reject | `npm stage reject <id>` | Discards the staged tarball |
+| Reject | `npm stage reject <id>` | 2FA prompt; discards the staged tarball |
 
 Staged versions share the version index with published ones: you cannot
 stage a version that already exists, and a staged version reserves its
-number until approved or rejected.
+number until approved or rejected. The dist-tag is fixed at staging time
+too — to restage under a different channel, `npm stage reject` first.
