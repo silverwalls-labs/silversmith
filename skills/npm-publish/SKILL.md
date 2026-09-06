@@ -1,6 +1,6 @@
 ---
 name: npm-publish
-description: Secure npm package publishing — trusted publishing (OIDC), automatic provenance, staged publish with 2FA approval, dist-tag promotion, pre-publish gates. Load when setting up or editing an npm publish workflow, a release flow, or a package.json/.npmrc for publication, and when reviewing an existing npm release setup.
+description: Secure npm package publishing. Use when setting up, editing, or reviewing an npm publish or release flow, or preparing a package for publication.
 ---
 
 # npm-publish
