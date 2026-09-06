@@ -6,10 +6,12 @@ description: Secure npm package publishing — trusted publishing (OIDC), automa
 # npm-publish
 
 Enforce current good practices for publishing npm packages: supply-chain
-integrity (trusted publishing, provenance), a safe release flow (staged
-publish, dist-tag promotion), and hard gates before anything reaches the
-registry. Apply these rules when authoring or reviewing publish workflows,
-release scripts, `package.json`, or `.npmrc`.
+integrity (trusted publishing, provenance) and a safe release flow (staged
+publish, dist-tag promotion). The scope is the publish itself — project
+quality gates (lint, tests, build, audits) are the project's own concern;
+this skill only requires that the publish is sequenced behind them. Apply
+these rules when authoring or reviewing publish workflows, release
+scripts, `package.json`, or `.npmrc`.
 
 Version floors (verify before anything else): **npm ≥ 11.15.0** and
 **Node ≥ 22.14.0** — required for staged publishing; trusted publishing
@@ -48,9 +50,11 @@ find, even ones you were not asked about.
 - **Versions are immutable.** NEVER attempt to republish, force-publish, or
   unpublish-then-republish a version. A bad release is fixed by publishing
   a new version and `npm deprecate`-ing the bad one.
-- **MUST gate the publish** on lint, tests, build, and a vulnerability
-  audit (`npm audit` and/or `osv-scanner`) — any failure aborts the
-  publish. Gates run in the same workflow, before the publish step.
+- **MUST sequence the publish behind the project's quality gates.** What
+  the gates contain (lint, tests, build, audits) is the project's choice
+  and out of scope here — but the publish job MUST NOT be able to run
+  unless they passed in the same workflow run, and none of them may be
+  `continue-on-error`.
 - **MUST control the shipped file set** with a `files` allowlist in
   `package.json` (preferred over `.npmignore`) and inspect it with
   `npm pack --dry-run` before releasing. No secrets, `.env` files, tests,
@@ -94,16 +98,13 @@ find, even ones you were not asked about.
 Worked walkthrough with commands and failure handling:
 [references/release-flow.md](references/release-flow.md).
 
-## Pre-publish gate checklist
+## Pre-publish checklist
 
-Every item passes before `npm stage publish` runs (automate all of it in
-the workflow):
+Publish-side items only — the project's own quality gates are assumed to
+exist and are out of scope; the first item is the boundary between them:
 
-- [ ] Lint clean.
-- [ ] Tests pass.
-- [ ] Build succeeds; artifacts are what `main` produces (no local edits).
-- [ ] `npm audit --omit=dev --audit-level=high` (and/or `osv-scanner`)
-      reports nothing at the failing threshold.
+- [ ] Project quality gates passed in the same workflow run, and the
+      publish job is `needs:`-sequenced after them.
 - [ ] Lockfile committed; install used `npm ci --ignore-scripts`.
 - [ ] `npm pack --dry-run` output reviewed: only intended files, no
       secrets/tests/`.env`/unintended source maps.
@@ -130,8 +131,8 @@ migration):
 - [ ] All actions pinned to full commit SHAs (not tags or branches).
 - [ ] `npm ci --ignore-scripts` (or equivalent lifecycle-script
       suppression) is used for install.
-- [ ] Gates (lint/test/audit/build) run in the same workflow before
-      publish and are not `continue-on-error`.
+- [ ] Publish job is sequenced (`needs:`) after the project's quality
+      gates in the same workflow; none of them are `continue-on-error`.
 - [ ] Publish step is `npm stage publish` (or documented justification for
       direct publish); trust config does not grant `--allow-publish`
       needlessly.

@@ -39,10 +39,12 @@ jobs:
       # Lifecycle scripts stay off during install: a compromised transitive
       # dependency must not execute code on the publishing runner.
       - run: npm ci --ignore-scripts
-      - run: npm run lint
-      - run: npm test
-      - run: npm audit --omit=dev --audit-level=high
-      - run: npm run build
+      # ── Project quality gates (placeholder) ──────────────────────────
+      # What runs here (lint, tests, build, audits) is the project's own
+      # choice and out of scope for this skill. What matters for publish
+      # correctness: the gates run in THIS workflow, and the publish job
+      # below is `needs:`-blocked on this job succeeding.
+      - run: npm run lint && npm test && npm run build # replace with your gates
       # Ship-list review: prints the exact tarball contents into the job log
       # for the environment reviewer. NOTE: --dry-run only LISTS files, it
       # never fails on content — the `files` allowlist plus human review of
