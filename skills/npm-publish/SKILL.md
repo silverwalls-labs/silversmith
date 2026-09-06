@@ -42,9 +42,9 @@ flag every violation, even ones you were not asked about.
   and disallow tokens"**.
 - **MUST stage releases through a dist-tag channel:** prereleases under
   `next`/`beta`; a stable that does not supersede the current `latest`
-  (a maintenance release of an old major) under an explicit
-  `legacy-<major>` channel — the registry refuses to move `latest`
-  backwards implicitly. Only a superseding stable may target `latest`;
+  (a maintenance/backport release) under an explicit `legacy-<major>`
+  channel — an untagged publish would move `latest` backwards and the
+  registry does not stop it. Only a superseding stable may target `latest`;
   hand-moving it (`npm dist-tag add`) is for rollback or a deliberate
   legacy promotion — never a side effect of CI on a feature branch, and
   never implicit via a prerelease published without `--tag`.

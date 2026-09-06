@@ -71,11 +71,11 @@ never as a side effect of CI on a feature branch.
 
 ## 3. Maintenance release of an old major
 
-Publishing 1.4.1 while `latest` is 2.x: the registry refuses to move
-`latest` backwards, so the pipeline stages it under `legacy-1` (the
-build job derives the channel by comparing the new version against
-`dist-tags.latest`). Review and approve as above; consumers opt in
-explicitly:
+Publishing 1.4.1 while `latest` is 2.x: an untagged publish would move
+`latest` backwards to 1.4.1 — the registry does not stop that — so the
+pipeline stages it under `legacy-1` (the build job derives the channel
+by comparing the new version against `dist-tags.latest`). Review and
+approve as above; consumers opt in explicitly:
 
 ```sh
 npm install @acme/widget@legacy-1
