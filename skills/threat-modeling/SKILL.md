@@ -44,10 +44,10 @@ every violation, even ones you were not asked about.
 - **MUST rank every threat** — High/Med/Low by default; upgrade to
   likelihood × impact for larger features where H/M/L stops
   discriminating.
-- **MUST assign a mitigation to every non-accepted threat:** prevent,
-  detect, respond, or accept. NEVER accept a risk without a reason, an
-  owner, and an expiry — an accepted risk with no owner and no expiry is
-  just an untracked risk.
+- **MUST give every threat a disposition:** a mitigation typed prevent,
+  detect, or respond — or explicit acceptance. NEVER accept a risk
+  without a reason, an owner, and an expiry — an accepted risk with no
+  owner and no expiry is just an untracked risk.
 - **MUST produce a tracked threat list** (issues or a register), each
   entry with asset, threat, ranking, mitigation, owner, status. A model
   that lives in a slide deck and is never updated is theater.
