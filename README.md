@@ -10,3 +10,4 @@ optional `references/`), usable by any tool that supports the standard.
 | Skill | Description |
 |---|---|
 | [npm-publish](skills/npm-publish/SKILL.md) | Secure npm package publishing: trusted publishing (OIDC), provenance, staged publish, dist-tag promotion. |
+| [vulnerability-triage](skills/vulnerability-triage/SKILL.md) | Evidence-based vulnerability triage: reachability over CVSS, urgency ranking, patch/pin/mitigate/accept, tracked findings with SLAs. |
