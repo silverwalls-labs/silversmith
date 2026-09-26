@@ -1,0 +1,32 @@
+# OWASP Top 10 — quick reference
+
+**Edition: Top 10:2025** ([top10.owasp.org/2025](https://top10.owasp.org/2025/)) —
+checked 2026-09-26. If a newer edition exists, it wins; update this file.
+
+Category links go to the official 2025 category page; the last column
+is the OWASP Cheat Sheet with the fix patterns. The cheat-sheet-per-
+category index lives at
+[cheatsheetseries.owasp.org/IndexTopTen.html](https://cheatsheetseries.owasp.org/IndexTopTen.html).
+
+| # | Category | One-line definition | Most common mistake | Fix pattern | Cheat sheet |
+|---|---|---|---|---|---|
+| A01 | [Broken Access Control](https://top10.owasp.org/2025/A01_2025-Broken_Access_Control/) | Users can act outside their intended permissions (includes SSRF since 2025) | Authorization enforced in the UI only, or missing per-object checks on user-supplied IDs (IDOR); unvalidated user-supplied URLs fetched server-side | Deny by default; enforce function- and record-level checks server-side on every request; allowlist outbound fetches | [Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html), [SSRF Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html) |
+| A02 | [Security Misconfiguration](https://top10.owasp.org/2025/A02_2025-Security_Misconfiguration/) | Insecure defaults or ad-hoc configuration anywhere in the stack | Default credentials, debug features or verbose errors in production, unhardened cloud storage/permissions | Hardened, minimal, repeatable configuration baseline applied identically per environment and reviewed in CI | (no dedicated sheet — see the [category page](https://top10.owasp.org/2025/A02_2025-Security_Misconfiguration/)) |
+| A03 | [Software Supply Chain Failures](https://top10.owasp.org/2025/A03_2025-Software_Supply_Chain_Failures/) | Compromise or vulnerability entering via dependencies, build systems, or distribution | Unpinned/outdated dependencies with no inventory; CI pipelines holding broad credentials; unverified artifacts | Pinned + locked dependencies, SCA in CI, signed artifacts with provenance, least-privilege pipelines | [Software Supply Chain Security](https://cheatsheetseries.owasp.org/cheatsheets/Software_Supply_Chain_Security_Cheat_Sheet.html), [Vulnerable Dependency Management](https://cheatsheetseries.owasp.org/cheatsheets/Vulnerable_Dependency_Management_Cheat_Sheet.html) |
+| A04 | [Cryptographic Failures](https://top10.owasp.org/2025/A04_2025-Cryptographic_Failures/) | Missing or weak cryptography for data in transit or at rest | Home-grown crypto, legacy algorithms (ECB, MD5/SHA-1, PKCS#1 v1.5), hardcoded keys and secrets | TLS everywhere; vetted libraries with modern primitives (e.g., AES-GCM); managed key lifecycle | [Cryptographic Storage](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html), [Key Management](https://cheatsheetseries.owasp.org/cheatsheets/Key_Management_Cheat_Sheet.html) |
+| A05 | [Injection](https://top10.owasp.org/2025/A05_2025-Injection/) | Untrusted data changes the syntax of a query, command, or document (SQL, NoSQL, OS, XSS, …) | Building queries, commands, or markup by string concatenation with user input | Parameterized queries/APIs, context-aware output encoding, allowlist input validation | [Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html), [XSS Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) |
+| A06 | [Insecure Design](https://top10.owasp.org/2025/A06_2025-Insecure_Design/) | The design itself lacks the security controls the risk profile requires | Shipping features with no threat model and no abuse cases — the flaw is upstream of any implementation | Threat model per feature ([threat-modeling.md](threat-modeling.md)), secure design patterns, abuse-case tests | [Secure Product Design](https://cheatsheetseries.owasp.org/cheatsheets/Secure_Product_Design_Cheat_Sheet.html) |
+| A07 | [Authentication Failures](https://top10.owasp.org/2025/A07_2025-Authentication_Failures/) | Weak confirmation of identity or session management | No MFA, no defense against credential stuffing/brute force, weak or long-lived sessions | MFA, rate limiting + breached-password checks, server-side session lifecycle | [Authentication](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html), [Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) |
+| A08 | [Software or Data Integrity Failures](https://top10.owasp.org/2025/A08_2025-Software_or_Data_Integrity_Failures/) | Code or data trusted without integrity verification | Insecure deserialization of untrusted data; unsigned updates/plugins pulled from untrusted sources | Verify signatures on code and updates; safe serialization formats; integrity-checked pipelines | [Deserialization](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html) |
+| A09 | [Security Logging and Alerting Failures](https://top10.owasp.org/2025/A09_2025-Security_Logging_and_Alerting_Failures/) | Attacks are invisible or nobody is alerted (renamed from "Monitoring", 2021) | Security events not logged — or logged with no alerting or response path attached | Log authn/authz/validation failures with context, centralize tamper-resistantly, alert on them | [Logging](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) |
+| A10 | [Mishandling of Exceptional Conditions](https://top10.owasp.org/2025/A10_2025-Mishandling_of_Exceptional_Conditions/) | Improper error/exception handling: failing open, logic errors, leaky errors (new in 2025) | Catch-and-continue around security controls; a dependency failure silently granting the happy path | Fail closed; generic error responses; a last-resort handler; test the error paths explicitly | [Error Handling](https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html) |
+
+## 2021 → 2025 map
+
+For readers used to the 2021 names: A10:2021 SSRF → merged into
+A01:2025; A06:2021 Vulnerable and Outdated Components → expanded into
+A03:2025 Software Supply Chain Failures; A07:2021 Identification and
+Authentication Failures → renamed A07:2025 Authentication Failures;
+A09:2021 "…Monitoring Failures" → renamed "…Alerting Failures";
+A10:2025 Mishandling of Exceptional Conditions is entirely new.
+Everything else is a rank change only.
