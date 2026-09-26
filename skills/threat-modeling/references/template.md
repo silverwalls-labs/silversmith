@@ -61,7 +61,7 @@ just "an attacker could X". Risk is High/Med/Low (use likelihood ×
 impact when H/M/L stops discriminating). Each mitigation is typed
 prevent, detect, or respond; a row may carry more than one typed
 control. Accepted threats carry no mitigation — mark the row
-`accepted` and move it to the Accepted risks table.
+`accepted` and add it to the Accepted risks table.
 
 | ID | Element/Flow | STRIDE | Threat | Asset | Precondition | Impact | Risk | Mitigation (type) | Owner | Status |
 |----|--------------|--------|--------|-------|--------------|--------|------|-------------------|-------|--------|

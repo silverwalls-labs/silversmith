@@ -22,8 +22,8 @@ storage) → a model is warranted.
 - Uploaded files (user content — treat as PII until proven otherwise)
 - The object storage bucket and its write credentials
 - Availability of the app (upload endpoint shares the web tier)
-- Integrity of every *other* user's profile (a served file executes in
-  their browser's context if we get content handling wrong)
+- Sessions and profiles of every *other* user (a served file executes
+  in the viewer's browser if we get content handling wrong)
 
 ## Trust boundaries
 
