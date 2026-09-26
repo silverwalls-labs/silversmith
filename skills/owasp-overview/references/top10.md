@@ -4,8 +4,8 @@
 checked 2026-09-26. If a newer edition exists, it wins; update this file.
 
 Category links go to the official 2025 category page; the last column
-is the OWASP Cheat Sheet with the fix patterns. The cheat-sheet-per-
-category index lives at
+is the OWASP Cheat Sheet with the fix patterns. The per-category
+cheat-sheet index lives at
 [cheatsheetseries.owasp.org/IndexTopTen.html](https://cheatsheetseries.owasp.org/IndexTopTen.html).
 
 | # | Category | One-line definition | Most common mistake | Fix pattern | Cheat sheet |
@@ -27,6 +27,8 @@ For readers used to the 2021 names: A10:2021 SSRF → merged into
 A01:2025; A06:2021 Vulnerable and Outdated Components → expanded into
 A03:2025 Software Supply Chain Failures; A07:2021 Identification and
 Authentication Failures → renamed A07:2025 Authentication Failures;
+A08:2021 Software **and** Data Integrity Failures → renamed A08:2025
+Software **or** Data Integrity Failures;
 A09:2021 "…Monitoring Failures" → renamed "…Alerting Failures";
 A10:2025 Mishandling of Exceptional Conditions is entirely new.
 Everything else is a rank change only.

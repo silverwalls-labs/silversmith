@@ -13,8 +13,10 @@ fix reference (the OWASP Cheat Sheet Series). Concrete remediation is
 the linked cheat sheet's concern; this skill does not restate it.
 
 Editions covered (as of 2026-09): **OWASP Top 10:2025**, **ASVS 5.0.0**,
-**API Security Top 10 2023**. Each reference file states its edition
-and the date it was checked.
+**API Security Top 10 2023**. Each standards reference states its
+edition and the date it was checked;
+[references/threat-modeling.md](references/threat-modeling.md) builds
+on the unversioned Cheat Sheet Series and carries a checked date only.
 
 ## Rules
 
@@ -25,8 +27,11 @@ every violation, even ones you were not asked about.
 - **MUST state the edition assessed against** (e.g., "Top 10:2025",
   "ASVS 5.0.0") in every assessment output, and MUST flag when OWASP
   has published a newer edition than the ones in
-  [references/](references/) — then treat the newer edition as
-  authoritative and note that this skill needs updating.
+  [references/](references/). Fetch the newer edition from the
+  official index linked in the reference file and assess against it;
+  if it cannot be fetched, assess against the documented edition and
+  state the staleness explicitly. NEVER guess unseen category names
+  or IDs. Either way, note that this skill needs updating.
 - **MUST map every finding to a standard identifier** — a Top 10
   category (A01–A10), an API Top 10 category (API1–API10), or an ASVS
   requirement ID (Vx.y.z). An unmapped finding is an opinion, not an
@@ -59,7 +64,7 @@ Open only the reference the task needs:
 
 | Task | Reference |
 |---|---|
-| Security posture review of a web application | [references/top10.md](references/top10.md), then [references/asvs.md](references/asvs.md) |
+| Security posture review of a web application | All four, in the sequence below |
 | Codebase mapping against a verification level | [references/asvs.md](references/asvs.md) |
 | API design or review (REST, GraphQL, service-to-service) | [references/api-top10.md](references/api-top10.md) |
 | Threat-modeling a new feature or design | [references/threat-modeling.md](references/threat-modeling.md) |
@@ -71,13 +76,13 @@ wherever an API surface exists.
 
 ## Notes and edge cases
 
-- **Edition provenance (as of 2026-09):** Top 10:2025 supersedes 2021.
-  SSRF (A10:2021) was folded into A01 Broken Access Control,
-  Vulnerable and Outdated Components (A06:2021) was expanded into A03
-  Software Supply Chain Failures, and A10 Mishandling of Exceptional
-  Conditions is new. ASVS 5.0.0 (May 2025) restructured 4.0 into 17
-  chapters with re-leveled requirements — 4.0 requirement IDs do not
-  map 1:1 to 5.0. API Security Top 10 2023 is the current API edition.
+- **Edition provenance (as of 2026-09):** Top 10:2025 supersedes 2021
+  — the merges and renames live in the "2021 → 2025 map" of
+  [references/top10.md](references/top10.md) (single source of truth;
+  do not restate it here). ASVS 5.0.0 (May 2025) restructured 4.0 into
+  17 chapters with re-leveled requirements — 4.0 requirement IDs do
+  not map 1:1 to 5.0. API Security Top 10 2023 is the current API
+  edition.
 - **Keeping current:** each reference file carries an
   "edition / checked" header. When OWASP publishes a new edition,
   update the file and its header in the same change — never mix
