@@ -10,7 +10,10 @@ wherever the project tracks review output, or emit it inline.
 ```markdown
 # Security review: <target>
 
-- **Scope:** <ref/PR/diff range> against <base>; <N> files
+- **Scope:** <ref/PR/diff range> against <base>; <N> files;
+  <diff- or tree-scoped>
+- **Blast radius:** <callers of changed code, configuration it reads,
+  dependencies added or bumped>
 - **Reviewed:** <paths/areas covered>
 - **Not reviewed:** <explicit gaps and why>
 - **Date:** <YYYY-MM-DD>
@@ -21,7 +24,7 @@ wherever the project tracks review output, or emit it inline.
 |---|---|---|---|
 | Static analysis | tool-backed | semgrep 1.x | |
 | Dependency audit | degraded | — | no network; lockfile-only |
-| Secrets | tool-backed | gitleaks 8.x | diff + history |
+| Secrets | tool-backed | gitleaks 8.24 | range `<base>..HEAD` + full history |
 | Manual review | manual | — | always manual |
 
 ## Findings
@@ -34,9 +37,9 @@ wherever the project tracks review output, or emit it inline.
 
 ## Dismissed
 
-| ID | Source | Reasoning |
-|---|---|---|
-| SCR-7 | semgrep <rule-id> | match is in a test fixture; sink not in shipped code |
+| ID | Source | Location | Reasoning |
+|---|---|---|---|
+| SCR-7 | semgrep <rule-id> | file:line @ ref | match is in a test fixture; sink not in shipped code |
 ```
 
 ## Finding record
@@ -69,8 +72,10 @@ then history cleanup, then the code change>
 
 - **Severity / verdict:** high / confirmed
 - **Dimension / source:** static analysis; semgrep
-  `python.lang.security.audit.formatted-sql-query` + manual trace
-- **Location:** `api/orders.py:84` @ `feat/order-filters`
+  `python.lang.security.audit.formatted-sql-query.formatted-sql-query`
+  + manual trace
+- **Location:** `api/orders.py:84,91` @ `feat/order-filters` — the
+  `sort` interpolation at :91 is the same root cause, merged
 
 **Description.** The new `status` filter is interpolated into the SQL
 string instead of being passed as a bound parameter.
@@ -86,7 +91,8 @@ table, and write if the driver allows stacked queries.
 
 **Remediation.** Bind the parameter:
 `cursor.execute("SELECT * FROM orders WHERE status = %s", (status,))`.
-The same handler builds `sort` into the query — fix both.
+The merged `sort` location (`api/orders.py:91`) is a column name, so
+binding does not apply — validate it against an allowlist. Fix both.
 
 **References.** CWE-89.
 ```

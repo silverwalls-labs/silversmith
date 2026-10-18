@@ -1,8 +1,10 @@
 # Verification pass
 
 The adversarial step behind flow step 4. Every candidate from every
-dimension goes through it; nothing reaches the report without a verdict
-and a severity. The stance is adversarial in both directions: try to
+dimension goes through it; nothing reaches the report without a
+verdict, and nothing is reported as a finding without a severity
+(dismissed `false-positive` entries carry none). The stance is
+adversarial in both directions: try to
 *break* the finding (prove it unreachable) and try to *land* it (trace
 the exploit path) — whichever succeeds decides.
 
@@ -76,7 +78,9 @@ Modifiers:
   what the same finding would get as `confirmed`. `false-positive` has
   no severity.
 - A committed secret starts at **high** (critical if the credential is
-  broad) regardless of where it sits — compromise is assumed.
+  broad) regardless of where it sits — compromise is assumed. This
+  floor takes precedence over the `plausible` cap: where the two
+  collide, the floor wins.
 - Maintenance-health findings (outdated, deprecated, unmaintained)
   without a live advisory are **low** or **info**: real, reportable,
   not urgent.

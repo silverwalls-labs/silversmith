@@ -1,11 +1,13 @@
 # Scanners: detect, install, run
 
-The tool matrix behind flow step 2. For every tool: probe first; if
-missing, propose the install command and **ask before installing** —
-never install unprompted. If the tool stays unavailable (declined, no
-network, unsupported platform), the dimension runs manually per its
-charter in [review-dimensions.md](review-dimensions.md) and the report
-records the mode.
+The tool matrix behind flow step 2, run once by the orchestrating
+agent — dimension passes receive the resolved mode and never re-probe
+or propose installs. For every tool: probe first; if missing, propose
+the install command and **ask before installing** — never install
+unprompted. If the tool stays unavailable (declined, no network,
+unsupported platform), the dimension runs manually per its charter in
+[review-dimensions.md](review-dimensions.md) and the report records
+the mode.
 
 Every run has one of two scopes — pick per the review target:
 
@@ -23,10 +25,16 @@ Every run has one of two scopes — pick per the review target:
 | Tree | `semgrep scan --config auto --json` |
 | Diff | `semgrep scan --config auto --json --baseline-commit <base>` |
 
-`--config auto` pulls community rules for the detected languages and
-needs network; offline, point `--config` at a vendored ruleset or run
-the dimension manually. Exit code is nonzero when findings exist — that
-is data, not an error.
+`--config auto` pulls community rules for the detected languages,
+needs network, and **sends metrics to semgrep.dev** (machine id,
+pseudoanonymized project hash) — registry-fetched configs require
+them. On a private repo, ask before running it (same treatment as
+trufflehog below) or use a local ruleset with `--metrics=off`.
+Offline, point `--config` at a vendored ruleset or run the dimension
+manually. Without `--error` these invocations exit 0 even when
+findings exist, so a nonzero exit means the scan itself failed
+(2 fatal, 7 bad config) — fall back to manual mode instead of
+treating the failure as output.
 
 ## Dependency audit — known vulnerabilities
 
@@ -42,12 +50,12 @@ Default, ecosystem-agnostic:
 Ecosystem natives — prefer them when a lockfile pins the ecosystem,
 since they resolve the actual installed graph:
 
-| Ecosystem | Detect | Run |
-|---|---|---|
-| npm | `command -v npm` | `npm audit` (add `--omit=dev` to see the shipped surface) |
-| Python | `command -v pip-audit` | `pip-audit` or `pip-audit -r requirements.txt` |
-| Rust | `cargo audit --version` | `cargo audit` |
-| Go | `command -v govulncheck` | `govulncheck ./...` — reports call-level reachability, carry it into the finding |
+| Ecosystem | Detect | Install | Run |
+|---|---|---|---|
+| npm | `command -v npm` | ships with Node | `npm audit` (add `--omit=dev` to see the shipped surface) |
+| Python | `command -v pip-audit` | `pipx install pip-audit` | `pip-audit` or `pip-audit -r requirements.txt` |
+| Rust | `cargo audit --version` | `cargo install cargo-audit` | `cargo audit` |
+| Go | `command -v govulncheck` | `go install golang.org/x/vuln/cmd/govulncheck@latest` | `govulncheck ./...` — call-level reachability, carry it into the finding |
 
 ## Dependency audit — freshness and maintenance
 
@@ -72,10 +80,17 @@ The second axis has no single scanner; combine:
 
 | | gitleaks (preferred) |
 |---|---|
-| Detect | `command -v gitleaks` |
+| Detect | `gitleaks version` — needs **≥ 8.19.0**: the `git`/`dir` subcommands landed there; older 8.x only has the deprecated `detect` |
 | Install | `brew install gitleaks` |
-| History (diff-scoped) | `gitleaks git --log-opts="<base>..HEAD" --report-format json --report-path <out>` |
-| Tree | `gitleaks dir . --report-format json --report-path <out>` |
+| Diff range | `gitleaks git --log-opts="<base>..HEAD" --report-format json --report-path <out>` — the commits being merged, only |
+| Full history | `gitleaks git . --report-format json --report-path <out>` |
+| Working tree | `gitleaks dir . --report-format json --report-path <out>` — files on disk, no history at all |
+
+The diff-range run covers nothing at or before `<base>`, and `dir`
+covers no history: when the review's scope includes pushed history
+(the secrets note in the main skill), run the full-history command —
+tree-scoped audits always do. The report states the coverage actually
+run.
 
 Alternate: trufflehog (`brew install trufflehog`;
 `trufflehog git file://. --since-commit <base> --json`) — its verified
@@ -85,10 +100,10 @@ verification phones home: ask before using it on a private repo.
 Manual fallback — grep the diff and reachable history for:
 
 - key-shaped literals: `AKIA[0-9A-Z]{16}` (AWS), `ghp_`/`github_pat_`,
-  `xox[baprs]-` (Slack), `sk-`/`sk_live_` (API keys),
-  `-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----`;
-- assignments to `password|passwd|secret|token|api_key|apikey|
-  private_key` with a non-placeholder literal on the right;
+  `xox[baprs]-` (Slack), `sk-[A-Za-z0-9_-]{20,}`/`sk_live_` (API
+  keys), `-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----`;
+- assignments with a non-placeholder literal on the right:
+  `(password|passwd|secret|token|api_key|apikey|private_key)\s*[:=]`;
 - high-entropy strings in config/env files. Hashes, UUIDs, and lorem
   placeholders are the classic false positives — verification decides.
 

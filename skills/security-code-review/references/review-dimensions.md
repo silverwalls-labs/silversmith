@@ -1,14 +1,17 @@
 # Review dimensions
 
 The four passes behind flow step 3. Each section below is a charter:
-hand it verbatim to a spawned subagent as its brief, or execute it
-inline when running sequentially.
+a spawned subagent's brief is the Common contract plus its own
+section, verbatim; when running sequentially, execute the charters
+inline.
 
 ## Common contract (every dimension)
 
-- **Inputs:** the scope header from flow step 1 (ref/diff, file list,
-  manifests, blast radius) and the dimension's mode from flow step 2
-  (tool-backed or manual, with the tool name if any).
+- **Inputs:** the scope header from flow step 1 (ref/diff, scan scope
+  — diff- or tree-scoped — file list, manifests, blast radius) and the
+  dimension's resolved mode from flow step 2 (tool-backed, manual, or
+  degraded, with the tool name if any) — tool probing and install
+  proposals already happened there; never redo them in the pass.
 - **Output:** a list of *candidate* findings — each with location,
   description, and raw evidence (scanner excerpt, code quote, or traced
   flow). **No severity, no verdict** — the verification pass owns both.
@@ -46,15 +49,21 @@ a tree-scoped review):
   native per [scanners.md](scanners.md). Each advisory hit becomes a
   candidate carrying the advisory id, the affected version range, the
   installed version, and — when the advisory names vulnerable
-  functions — whether the project calls them.
+  functions — whether the project calls them. Manual mode (tool
+  unavailable but network up): look up each direct dependency at its
+  pinned version against the advisory sources (osv.dev, GitHub
+  advisories, the registry's advisory page), diff-touched manifests
+  first; offline, inspect the lockfile instead (deprecation markers,
+  ancient pins) and mark the axis degraded.
 - **Maintenance health:** outdated majors, deprecated packages,
   archived or years-stale upstreams, and unmaintained packages in the
   transitive tree that sit on a security boundary (parsers, crypto,
   auth middleware).
 - **New dependencies get extra scrutiny:** a dependency *added* in the
-  diff is checked for typosquatting, age, download count, install
-  scripts (`preinstall`/`postinstall`), and whether the need justifies
-  the tree it brings in. "Could this be twenty lines of code instead?"
+  diff (every direct dependency, on a tree-scoped review) is checked
+  for typosquatting, age, download count, install scripts
+  (`preinstall`/`postinstall`), and whether the need justifies the
+  tree it brings in. "Could this be twenty lines of code instead?"
   is a legitimate review question.
 
 ## 3. Secrets
@@ -69,16 +78,20 @@ there.
 - Judgment calls to pass to verification rather than drop: internal
   hostnames and IPs, employee emails in fixtures, example keys that
   look too real.
-- For every hit, record the commit that introduced it — remediation
-  differs between "in this diff, unpushed" (amend it away) and
-  "in pushed history" (rotate + history cleanup; see the secrets rule
-  in the main skill).
+- For every hit, record the commit that introduced it. Rotation is the
+  remediation in every case — any committed secret is compromised (the
+  secrets rule in the main skill); the commit's location changes only
+  the cleanup step: unpushed, amend/rebase it out before pushing;
+  pushed, history cleanup on top of the rotation.
 
 ## 4. Manual security review
 
 Always runs, even when every scanner is available — tools do not see
 missing authorization checks or business-logic flaws. Walk the diff
-class by class:
+class by class; on a tree-scoped audit, walk the security-sensitive
+surfaces instead (auth, crypto, input handling, CI and workflow
+config, dependency manifests) and read change-relative checks below as
+"anywhere present":
 
 - **Injection:** any user-controlled value reaching the sinks in
   dimension 1 via a path a SAST rule might not model (ORM `raw()`
