@@ -3,7 +3,10 @@
 The output contract behind flow step 5. Copy the skeletons, fill them,
 keep the order: findings sorted severity-descending, `confirmed` before
 `plausible` within a severity. The report is tracker-agnostic — file it
-wherever the project tracks review output, or emit it inline.
+wherever the project tracks review output, or emit it inline. Secret
+material is never reproduced verbatim anywhere in the report — mask it
+(rule id, location, first/last four characters): a filed report must
+not become the next leak.
 
 ## Report skeleton
 
@@ -55,7 +58,7 @@ wherever the project tracks review output, or emit it inline.
 
 **Evidence.** <raw scanner excerpt and/or quoted code and the traced
 path from input to sink — the load-bearing section; quotes, not
-paraphrase>
+paraphrase. Exception: secret values appear masked, never verbatim>
 
 **Impact.** <what an attacker gets, under which preconditions>
 

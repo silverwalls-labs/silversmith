@@ -43,12 +43,15 @@ and flag every violation, even ones you were not asked about.
   installing; on decline, fall back to manual analysis for that
   dimension, recording the mode as `degraded` when even the manual
   procedure can only partially run (e.g. offline).
-- **MUST ask before any command that sends project data off-host from
-  a private repo** — semgrep `--config auto` metrics, `npm audit`'s
-  dependency-graph upload, pip-audit/osv-scanner package queries,
-  trufflehog's live credential verification, manual advisory lookups.
-  Consent is gathered once, at flow step 2, alongside install
-  proposals; dimension passes never ask.
+- **MUST ask before any command that transmits project data off-host
+  from a private repo** — the class, not a fixed list: scanner
+  telemetry (semgrep `--config auto`), advisory queries carrying
+  dependency names (`npm audit`, osv-scanner, pip-audit, govulncheck),
+  registry freshness lookups (`npm outdated`/`npm view`,
+  `pip list --outdated`, `go list -m -u all`), live credential
+  verification (trufflehog), manual advisory lookups. Consent is
+  gathered once, at flow step 2; a declined category runs
+  offline-degraded, and dimension passes never ask or exceed it.
 - **MUST treat scanner output as leads, not conclusions:** every raw
   hit passes through the verification pass
   ([references/verification.md](references/verification.md)) before it

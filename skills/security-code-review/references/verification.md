@@ -24,12 +24,13 @@ the exploit path) — whichever succeeds decides.
 ## Procedure, per finding
 
 1. **Shipped or not?** Is the flagged code in the artifact that ships,
-   or only in tests, examples, or build tooling? Test-only usually
-   caps severity — except secrets (compromised anywhere) and CI code
-   (the pipeline *is* an attack surface). Generated and vendored code
-   caps code-quality findings only, never secrets, dependency, or
-   CI/config findings — a vendored library's known CVE stays
-   reportable.
+   or only in tests, examples, or build tooling? Test-only lowers
+   severity one notch (a modifier, below the rubric) — except secrets
+   (compromised anywhere) and CI code (the pipeline *is* an attack
+   surface). Generated and vendored code: code-quality findings are
+   dismissed as `false-positive` (out of scope by policy, recorded in
+   the appendix); secrets, dependency, and CI/config findings are
+   untouched — a vendored library's known CVE stays reportable.
 2. **Reachable?** Trace the actual call path from attacker-influenced
    input to the sink. Do not assume a route is exposed — find the
    registration; do not assume input is attacker-controlled — find
@@ -76,16 +77,17 @@ severity label is an input, never the output.
 | **Limited** (info leak, DoS of one endpoint, missing hardening) | medium | low | info |
 
 Modifiers — applied in this order: lowering adjusters, then the
-verdict cap, floors last.
+verdict drop, floors last.
 
-- Lowering adjusters — apply every one that matches, but never below
-  `info`: test-only code (step 1), vulnerable function not called
-  (step 4), and the maintenance-health ceiling (outdated, deprecated,
-  or unmaintained with no live advisory lands at **low** or **info**:
-  real, reportable, not urgent).
-- Verdict cap: a `plausible` finding then drops one further notch; at
+- Lowering adjusters — **one notch each**, apply every one that
+  matches, never below `info`: test-only code (step 1) and vulnerable
+  function not called (step 4). The maintenance-health rule is a
+  ceiling, not a notch: outdated, deprecated, or unmaintained with no
+  live advisory lands at **low** or **info** — real, reportable, not
+  urgent.
+- Verdict drop: a `plausible` finding then drops one further notch; at
   `info` it stays `info` — there is no lower notch, and `info` already
   means report-only. `false-positive` has no severity.
 - Floors win: a committed secret starts at **high** (critical if the
   credential is broad) regardless of where it sits — compromise is
-  assumed — and overrides every adjuster and cap above.
+  assumed — and overrides every adjuster and drop above.
