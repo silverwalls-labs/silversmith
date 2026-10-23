@@ -38,10 +38,10 @@ at a vendored ruleset or run the dimension manually. Without
 `--error` these invocations exit 0 even when findings exist, so a
 nonzero exit means the scan itself failed (2 fatal, 7 bad config) —
 fall back to manual mode instead of treating the failure as output.
-One failure is recoverable: `--baseline-commit` aborts unless run in
-a git checkout with a clean worktree and a locally resolvable
-`<base>` (dirty tree, uncommitted-diff review, shallow clone) — in
-that case run the tree scan and keep only findings in changed files
+One failure is recoverable: `--baseline-commit` needs a git checkout
+and a locally resolvable `<base>` — it handles dirty worktrees fine —
+so when `<base>` does not resolve (shallow clone) or there is no
+checkout, run the tree scan and keep only findings in changed files
 instead of dropping to manual.
 
 ## Dependency audit — known vulnerabilities
@@ -77,9 +77,12 @@ The second axis has no single scanner; combine:
   `npm view <pkg>@<installed-version> deprecated` — the bare `<pkg>`
   form reports only the latest version and misses deprecations of the
   pinned one.
-- **Unmaintained:** last release date (`npm view <pkg> time.modified`,
-  registry/API equivalents elsewhere) and an archived upstream repo are
-  the two strongest signals. Years-stale + open CVEs = finding.
+- **Unmaintained:** last release date — the newest *per-version*
+  timestamp in `npm view <pkg> time --json` (NOT `time.modified`,
+  which deprecation edits and metadata changes bump: a dead package
+  can look weeks-fresh), registry equivalents elsewhere — and an
+  archived upstream repo are the two strongest signals. Years-stale +
+  open CVEs = finding.
 - **Typosquats:** for every dependency *added* in the diff (every
   direct dependency, on a tree-scoped review), compare the name
   character-by-character against the popular package it resembles
@@ -110,7 +113,10 @@ commit SHA), and a range run alone misses secrets at or before
 `git rev-parse --is-shallow-repository` first: on a shallow clone,
 `git fetch --unshallow` (a network call — consent rule applies) or
 mark the dimension degraded; never report full-history coverage the
-clone did not contain. Tree-scoped reviews add the working-tree run.
+clone did not contain. Every review also runs the working-tree scan
+(`dir`): uncommitted or staged diff content exists only in the
+working tree — history cannot contain it — so the full-history run
+alone never covers the diff of an uncommitted-change review.
 
 Alternate: trufflehog (`brew install trufflehog`;
 `trufflehog git file://. --json` — full history, same mandate and
@@ -122,20 +128,25 @@ off-host data under the main skill's consent rule; pass
 `--no-verification` to skip it.
 
 Manual fallback — `grep -E` over the diff and working tree, and
-`git grep -E <pattern> $(git rev-list <base>..HEAD)` for history
-(prints `commit:path:line`, keeping attribution — plain `grep` cannot
-read history). The patterns are ERE — the brace/alternation ones
-match nothing under BRE `grep` — and the PEM pattern must follow `--`
-so its leading hyphens are not parsed as options. On a large repo,
-bound the manual history scan to the review range plus a recent
-window and record the dimension degraded: unbounded history is the
-tool's job, not the fallback's. Patterns:
+`git grep -nE <pattern> $(git rev-list --all)` for history (`-n` is
+required: without it git grep prints `commit:path:<match>` with no
+line number; plain `grep` cannot read history at all). Full history
+matches the tool mandate; any bounding — a large repo scanned only
+over the review range plus a recent window — records the dimension
+degraded, whatever the repo size. Guards: confirm `git rev-list`
+printed at least one commit (an empty or failed substitution makes
+`git grep` silently scan only the worktree and exit 0) and run the
+same shallow-clone check as the tool path. The patterns are POSIX
+ERE — the brace/alternation ones match nothing under BRE `grep`, and
+`git grep -E` has no `\s` (use `[[:space:]]`) — and the PEM pattern
+must follow `--` so its leading hyphens are not parsed as options.
+Patterns:
 
 - key-shaped literals: `AKIA[0-9A-Z]{16}` (AWS), `ghp_`/`github_pat_`,
   `xox[baprs]-` (Slack), `sk-[A-Za-z0-9_-]{20,}`/`sk_live_` (API
   keys), `-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----`;
 - assignments with a non-placeholder literal on the right:
-  `(password|passwd|secret|token|api_key|apikey|private_key)\s*[:=]`;
+  `(password|passwd|secret|token|api_key|apikey|private_key)[[:space:]]*[:=]`;
 - high-entropy strings in config/env files. Hashes, UUIDs, and lorem
   placeholders are the classic false positives — verification decides.
 
@@ -147,8 +158,10 @@ the location (`file:line`, commit for history hits), and the raw
 matched snippet or advisory summary. Evidence that survives into the
 report must be quotable — a paraphrase of scanner output is not
 evidence. One exception: secret material itself is never carried or
-quoted verbatim — mask it (rule id, location, first/last four
-characters) in candidates, the report, and anything filed, so the
-report cannot become the next leak. Severity fields in tool output (CVSS, semgrep severity) ride
+quoted — a secrets candidate holds the rule id, the location, the
+secret's length, and at most the detector-identifying prefix (`AKIA`,
+`ghp_`), never any other characters of the value. The `--redact`
+report plus the location is the whole evidence; never re-open the
+commit to extract the value. Severity fields in tool output (CVSS, semgrep severity) ride
 along as input to the rubric in
 [verification.md](verification.md), never as the final severity.

@@ -45,13 +45,16 @@ and flag every violation, even ones you were not asked about.
   procedure can only partially run (e.g. offline).
 - **MUST ask before any command that transmits project data off-host
   from a private repo** — the class, not a fixed list: scanner
-  telemetry (semgrep `--config auto`), advisory queries carrying
-  dependency names (`npm audit`, osv-scanner, pip-audit, govulncheck),
-  registry freshness lookups (`npm outdated`/`npm view`,
-  `pip list --outdated`, `go list -m -u all`), live credential
-  verification (trufflehog), manual advisory lookups. Consent is
-  gathered once, at flow step 2; a declined category runs
-  offline-degraded, and dimension passes never ask or exceed it.
+  telemetry (semgrep `--config auto`), advisory queries and registry
+  freshness lookups carrying dependency names (`npm audit`/`outdated`/
+  `view`, osv-scanner, pip-audit, govulncheck, `go list -m -u all`,
+  manual advisory lookups) — and before live credential verification
+  (trufflehog) on **any** repo: discovered secret material is
+  sensitive regardless of visibility. Consent is gathered once, at
+  flow step 2; a declined category uses the best consent-compatible
+  alternative (a metrics-free named ruleset, `--no-verification`),
+  recording `degraded` only when none exists — the mode reflects what
+  actually ran. Passes never ask or exceed the consent.
 - **MUST treat scanner output as leads, not conclusions:** every raw
   hit passes through the verification pass
   ([references/verification.md](references/verification.md)) before it
@@ -88,14 +91,14 @@ and flag every violation, even ones you were not asked about.
    manifests; sketch the blast radius. This becomes the report's scope
    header.
 2. **Detect tooling.** Probe for each dimension's scanners, propose
-   installs for missing ones (and ask), gather consent for anything
-   that sends project data off-host, and record each dimension's
-   mode — `tool-backed`, `manual`, or `degraded` (partial coverage,
-   e.g. offline), with `skipped` plus a reason as the explicit last
-   resort: [references/scanners.md](references/scanners.md). Probing,
-   install proposals, and consent happen here, once — dimension passes
-   receive the resolved modes and commands and never re-probe,
-   propose, or ask.
+   installs for missing ones (and ask), gather off-host consent, and
+   record each dimension's mode — `tool-backed`, `manual`, or
+   `degraded` (partial coverage, e.g. offline), with `skipped` plus a
+   reason as the last resort for the three tool dimensions (the
+   manual-review pass is never skipped):
+   [references/scanners.md](references/scanners.md). Probing, install
+   proposals, and consent happen here, once — passes receive the
+   resolved modes and commands and never re-probe, propose, or ask.
 3. **Fan out the dimensions.** If the harness supports spawning
    subagents, run the four passes in parallel, one focused agent per
    dimension; otherwise run the same passes sequentially in order.
@@ -129,12 +132,14 @@ and flag every violation, even ones you were not asked about.
   input handling, CI and workflow config, dependency manifests). State
   in the report what was deprioritized or not reviewed — an unstated
   gap is worse than a stated one.
-- **Generated and vendored code:** exempt from code-quality findings
-  in the manual pass — never from secrets or dependency scanning, and
-  never from the config-and-CI checks: a generated workflow gaining
-  secrets access is in scope and its candidate is still emitted
-  (verification filters, collection does not). A vendored library
-  with a known CVE is a finding; its code style is not.
+- **Generated and vendored code:** only style and hardening-practice
+  findings are out of scope there; exploitable vulnerabilities,
+  secrets, dependency advisories, and config-and-CI issues always
+  stay in. Passes emit every candidate regardless (verification
+  filters, collection does not); verification dismisses the
+  out-of-scope ones into the appendix. A vendored library with a
+  known CVE — or an exploitable flaw — is a finding; its code style
+  is not.
 - **Reviewing your own AI-authored diff:** treat it as third-party
   code. The AI-code scrutiny applies to your own output, and the
   verification pass may not be skipped on the grounds that you just

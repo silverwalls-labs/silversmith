@@ -27,9 +27,11 @@ running sequentially, execute the charters inline.
   failed, path unreadable, timeout), say so in the coverage note.
 - Candidates are cheap and dismissals are recorded, so when in doubt,
   **emit the candidate** — verification filters, collection does not.
-- Generated and vendored paths stay in scope for secrets, dependency,
-  and config-and-CI checks — a generated workflow gaining secrets
-  access is a candidate; only code-quality findings are exempt.
+- Generated and vendored paths: emit every candidate as usual —
+  exploitable vulnerabilities, secrets, dependency, and config-and-CI
+  findings stay fully in scope there; only style and
+  hardening-practice candidates will be dismissed, and that happens
+  at verification, never in the pass.
 
 ## 1. Static analysis
 
@@ -83,8 +85,9 @@ a tree-scoped review):
 
 Run the secrets tool on the full reachable history — it subsumes the
 diff range; attribute in-range hits by commit SHA — plus the working
-tree on a tree-scoped audit, per [scanners.md](scanners.md); manual
-mode uses the fallback patterns there.
+tree on every review (uncommitted diff content exists only there),
+per [scanners.md](scanners.md); manual mode uses the fallback
+patterns there.
 
 - Candidates: credentials, API keys and tokens, private keys,
   signed/presigned URLs, session cookies, cloud account ids paired

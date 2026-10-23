@@ -27,10 +27,12 @@ the exploit path) — whichever succeeds decides.
    or only in tests, examples, or build tooling? Test-only lowers
    severity one notch (a modifier, below the rubric) — except secrets
    (compromised anywhere) and CI code (the pipeline *is* an attack
-   surface). Generated and vendored code: code-quality findings are
-   dismissed as `false-positive` (out of scope by policy, recorded in
-   the appendix); secrets, dependency, and CI/config findings are
-   untouched — a vendored library's known CVE stays reportable.
+   surface). Generated and vendored code: style and
+   hardening-practice candidates are dismissed as `false-positive`
+   (out of scope by policy, recorded in the appendix); exploitable
+   vulnerabilities, secrets, dependency, and CI/config findings are
+   untouched — a vendored library's known CVE, or an exploitable
+   flaw, stays reportable.
 2. **Reachable?** Trace the actual call path from attacker-influenced
    input to the sink. Do not assume a route is exposed — find the
    registration; do not assume input is attacker-controlled — find
@@ -57,10 +59,14 @@ the exploit path) — whichever succeeds decides.
   the sanitizer/mitigation on the actual path.
 - **Secrets scanners:** documented example/placeholder keys, high
   entropy non-secrets (hashes, UUIDs, base64 assets), dummy test
-  credentials. "It's a test key" requires proof — a comment saying so,
-  a `test`/`example` path, *and* the key not resembling a live format;
-  when provable, still note it, since real keys get pasted into test
-  files constantly.
+  credentials. "It's a test key" requires proof — any one of: it is a
+  provider's *published* example value (AWS's `AKIAIOSFODNN7EXAMPLE`),
+  the fixture path and comment mark it as dummy *and* the value
+  provably never worked (never issued, or rejected by live
+  verification when consented), or rotation records show it dead.
+  Format-resemblance alone can neither convict nor acquit — scanners
+  match live formats by construction. When provable, still note it,
+  since real keys get pasted into test files constantly.
 - **Dependency audits:** advisory withdrawn; affected-range misparse;
   dev-only dependency flagged against the shipped surface (lower, not
   dismiss — the dev machine and CI are surfaces too).

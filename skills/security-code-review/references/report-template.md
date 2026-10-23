@@ -4,9 +4,10 @@ The output contract behind flow step 5. Copy the skeletons, fill them,
 keep the order: findings sorted severity-descending, `confirmed` before
 `plausible` within a severity. The report is tracker-agnostic — file it
 wherever the project tracks review output, or emit it inline. Secret
-material is never reproduced verbatim anywhere in the report — mask it
-(rule id, location, first/last four characters): a filed report must
-not become the next leak.
+material is never reproduced anywhere in the report — a secrets
+finding shows the rule id, location, secret length, and at most the
+detector-identifying prefix (`AKIA…`, `ghp_…`), no other characters
+of the value: a filed report must not become the next leak.
 
 ## Report skeleton
 
@@ -42,7 +43,7 @@ not become the next leak.
 
 | ID | Source | Location | Reasoning |
 |---|---|---|---|
-| SCR-7 | semgrep <rule-id> | file:line @ ref | match is in a test fixture; sink not in shipped code |
+| SCR-7 | semgrep <rule-id> | file:line @ ref | framework-mitigated: template auto-escapes on this path (verified active) |
 ```
 
 ## Finding record
@@ -87,9 +88,12 @@ string instead of being passed as a bound parameter.
 
     query = f"SELECT * FROM orders WHERE status = '{status}'"
 
-`status` comes from `request.args["status"]` (`api/orders.py:78`) with
-no validation; the route is registered unauthenticated
-(`api/routes.py:12`). Reachability traced end to end.
+`status` comes from `request.args["status"]` (`api/orders.py:78`) and
+the merged `sort` from `request.args["sort"]` (`api/orders.py:79`),
+both without validation; the route is registered unauthenticated
+(`api/routes.py:12`). Reachability traced end to end for both
+locations — a merged location only shares the verdict when its own
+trace is shown.
 
 **Impact.** Unauthenticated SQL injection: full read of the orders
 table, and write if the driver allows stacked queries.
