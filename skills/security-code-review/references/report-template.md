@@ -24,7 +24,7 @@ wherever the project tracks review output, or emit it inline.
 |---|---|---|---|
 | Static analysis | tool-backed | semgrep 1.x | |
 | Dependency audit | degraded | — | no network; lockfile-only |
-| Secrets | tool-backed | gitleaks 8.24 | range `<base>..HEAD` + full history |
+| Secrets | tool-backed | gitleaks 8.24 | full history (subsumes the diff range) |
 | Manual review | manual | — | always manual |
 
 ## Findings
@@ -81,7 +81,9 @@ then history cleanup, then the code change>
 string instead of being passed as a bound parameter.
 
 **Evidence.**
+
     query = f"SELECT * FROM orders WHERE status = '{status}'"
+
 `status` comes from `request.args["status"]` (`api/orders.py:78`) with
 no validation; the route is registered unauthenticated
 (`api/routes.py:12`). Reachability traced end to end.

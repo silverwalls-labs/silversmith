@@ -1,9 +1,12 @@
 # Review dimensions
 
 The four passes behind flow step 3. Each section below is a charter:
-a spawned subagent's brief is the Common contract plus its own
-section, verbatim; when running sequentially, execute the charters
-inline.
+a spawned subagent's brief is the Common contract, its own section,
+and its dimension's resolved commands and output-reading notes copied
+out of [scanners.md](scanners.md) — these files live in the skill, not
+the reviewed repo, so a bare relative link resolves to nothing from
+the pass's working directory. When running sequentially, execute the
+charters inline.
 
 ## Common contract (every dimension)
 
@@ -20,14 +23,19 @@ inline.
   failed, path unreadable, timeout), say so in the coverage note.
 - Candidates are cheap and dismissals are recorded, so when in doubt,
   **emit the candidate** — verification filters, collection does not.
+- Generated and vendored paths stay in scope for secrets, dependency,
+  and config-and-CI checks — a generated workflow gaining secrets
+  access is a candidate; only code-quality findings are exempt.
 
 ## 1. Static analysis
 
 Run the SAST tool per [scanners.md](scanners.md) at the right scope;
 carry every hit forward as a candidate with its rule id and snippet.
 
-Manual mode: walk the diff against the dangerous-sink list and flag
-every flow from external input into one of them:
+Manual mode: walk the diff (on a tree-scoped audit, the
+security-sensitive surfaces, as in dimension 4) against the
+dangerous-sink list and flag every flow from external input into one
+of them:
 
 - code execution: `eval`, `exec`, `Function()`, `child_process`/
   `subprocess`/`os.system` with built strings, deserialization of
@@ -68,9 +76,10 @@ a tree-scoped review):
 
 ## 3. Secrets
 
-Run the secrets tool on the diff range *and* the reachable history per
-[scanners.md](scanners.md); manual mode uses the fallback patterns
-there.
+Run the secrets tool on the full reachable history — it subsumes the
+diff range; attribute in-range hits by commit SHA — plus the working
+tree on a tree-scoped audit, per [scanners.md](scanners.md); manual
+mode uses the fallback patterns there.
 
 - Candidates: credentials, API keys and tokens, private keys,
   signed/presigned URLs, session cookies, cloud account ids paired

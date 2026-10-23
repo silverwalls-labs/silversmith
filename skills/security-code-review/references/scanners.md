@@ -6,15 +6,17 @@ or propose installs. For every tool: probe first; if missing, propose
 the install command and **ask before installing** — never install
 unprompted. If the tool stays unavailable (declined, no network,
 unsupported platform), the dimension runs manually per its charter in
-[review-dimensions.md](review-dimensions.md) and the report records
-the mode.
+[review-dimensions.md](review-dimensions.md), recorded as `manual` —
+or `degraded` when even the manual procedure can only partially run
+(e.g. offline advisory lookups).
 
 Every run has one of two scopes — pick per the review target:
 
 - **diff-scoped** — a PR or branch review: scan what changed against
   the base ref. Faster, and findings map 1:1 to the change.
-- **tree-scoped** — a codebase audit or when the diff touches
-  manifests/config whose effects are global: scan the whole tree.
+- **tree-scoped** — a codebase audit. A diff that touches a manifest
+  escalates only the dependency dimension's scan (the touched lockfile
+  resolves the whole installed graph), never the entire review.
 
 ## Static analysis (SAST)
 
@@ -27,14 +29,15 @@ Every run has one of two scopes — pick per the review target:
 
 `--config auto` pulls community rules for the detected languages,
 needs network, and **sends metrics to semgrep.dev** (machine id,
-pseudoanonymized project hash) — registry-fetched configs require
-them. On a private repo, ask before running it (same treatment as
-trufflehog below) or use a local ruleset with `--metrics=off`.
-Offline, point `--config` at a vendored ruleset or run the dimension
-manually. Without `--error` these invocations exit 0 even when
-findings exist, so a nonzero exit means the scan itself failed
-(2 fatal, 7 bad config) — fall back to manual mode instead of
-treating the failure as output.
+pseudoanonymized project hash) — it refuses `--metrics=off`. Named
+registry rulesets do not: on a private repo prefer
+`--config p/<ruleset> --metrics=off` (fetches rules, sends no
+metrics) or a local ruleset, and treat `auto` as off-host data (the
+consent rule in the main skill). Offline, point `--config` at a
+vendored ruleset or run the dimension manually. Without `--error`
+these invocations exit 0 even when findings exist, so a nonzero exit
+means the scan itself failed (2 fatal, 7 bad config) — fall back to
+manual mode instead of treating the failure as output.
 
 ## Dependency audit — known vulnerabilities
 
@@ -70,8 +73,9 @@ The second axis has no single scanner; combine:
 - **Unmaintained:** last release date (`npm view <pkg> time.modified`,
   registry/API equivalents elsewhere) and an archived upstream repo are
   the two strongest signals. Years-stale + open CVEs = finding.
-- **Typosquats:** for every dependency *added* in the diff, compare the
-  name character-by-character against the popular package it resembles
+- **Typosquats:** for every dependency *added* in the diff (every
+  direct dependency, on a tree-scoped review), compare the name
+  character-by-character against the popular package it resembles
   (`lodash`/`1odash`, `requests`/`request`), and check the package's
   age and download count — a days-old package shadowing a famous name
   is a finding regardless of its code.
@@ -82,22 +86,33 @@ The second axis has no single scanner; combine:
 |---|---|
 | Detect | `gitleaks version` — needs **≥ 8.19.0**: the `git`/`dir` subcommands landed there; older 8.x only has the deprecated `detect` |
 | Install | `brew install gitleaks` |
-| Diff range | `gitleaks git --log-opts="<base>..HEAD" --report-format json --report-path <out>` — the commits being merged, only |
 | Full history | `gitleaks git . --report-format json --report-path <out>` |
 | Working tree | `gitleaks dir . --report-format json --report-path <out>` — files on disk, no history at all |
 
-The diff-range run covers nothing at or before `<base>`, and `dir`
-covers no history: when the review's scope includes pushed history
-(the secrets note in the main skill), run the full-history command —
-tree-scoped audits always do. The report states the coverage actually
-run.
+Exit codes: gitleaks exits **1 when leaks are found** (0 clean, 126
+on error) — read the report, never treat exit 1 as a failed scan.
+Write `<out>` to a temp directory outside the repo (`mktemp -d`),
+never into the working tree: the report quotes every matched secret
+verbatim, and leaving it in the repo plants the exact leak the next
+pass would flag. The secrets scan is always the full-history run — it
+subsumes any `--log-opts="<base>..HEAD"` range run (attribute in-range
+hits by commit SHA), and a range run alone misses secrets at or before
+`<base>` that the main skill declares compromised. Tree-scoped reviews
+add the working-tree run.
 
 Alternate: trufflehog (`brew install trufflehog`;
 `trufflehog git file://. --since-commit <base> --json`) — its verified
-results (live credential check) upgrade a finding's evidence, but
-verification phones home: ask before using it on a private repo.
+results upgrade a finding's evidence, but verification sends each
+candidate secret to the issuing provider's live API (AWS, GitHub, …)
+to test it: discovered secret material leaves the machine. That is
+off-host data under the main skill's consent rule; pass
+`--no-verification` to skip it.
 
-Manual fallback — grep the diff and reachable history for:
+Manual fallback — search the review scope (diff plus full reachable
+history; on a tree audit, also the working tree) with `grep -E`: the
+patterns are ERE — plain BRE `grep` silently matches none of them —
+and the PEM pattern must follow `--` so its leading hyphens are not
+parsed as options. Patterns:
 
 - key-shaped literals: `AKIA[0-9A-Z]{16}` (AWS), `ghp_`/`github_pat_`,
   `xox[baprs]-` (Slack), `sk-[A-Za-z0-9_-]{20,}`/`sk_live_` (API

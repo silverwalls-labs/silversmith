@@ -40,8 +40,15 @@ and flag every violation, even ones you were not asked about.
   anything unprompted:** probe for each scanner, propose the install
   command for missing ones
   ([references/scanners.md](references/scanners.md)), and ask before
-  installing; on decline or no network, fall back to manual analysis
-  for that dimension.
+  installing; on decline, fall back to manual analysis for that
+  dimension, recording the mode as `degraded` when even the manual
+  procedure can only partially run (e.g. offline).
+- **MUST ask before any command that sends project data off-host from
+  a private repo** — semgrep `--config auto` metrics, `npm audit`'s
+  dependency-graph upload, pip-audit/osv-scanner package queries,
+  trufflehog's live credential verification, manual advisory lookups.
+  Consent is gathered once, at flow step 2, alongside install
+  proposals; dimension passes never ask.
 - **MUST treat scanner output as leads, not conclusions:** every raw
   hit passes through the verification pass
   ([references/verification.md](references/verification.md)) before it
@@ -78,18 +85,23 @@ and flag every violation, even ones you were not asked about.
    manifests; sketch the blast radius. This becomes the report's scope
    header.
 2. **Detect tooling.** Probe for each dimension's scanners, propose
-   installs for missing ones (and ask), and record each dimension's
+   installs for missing ones (and ask), gather consent for anything
+   that sends project data off-host, and record each dimension's
    mode — `tool-backed`, `manual`, or `degraded` (partial coverage,
    e.g. offline), with `skipped` plus a reason as the explicit last
-   resort: [references/scanners.md](references/scanners.md). Probing
-   and install proposals happen here, once — dimension passes receive
-   the resolved mode and never re-probe or propose installs.
+   resort: [references/scanners.md](references/scanners.md). Probing,
+   install proposals, and consent happen here, once — dimension passes
+   receive the resolved modes and commands and never re-probe,
+   propose, or ask.
 3. **Fan out the dimensions.** If the harness supports spawning
    subagents, run the four passes in parallel, one focused agent per
    dimension; otherwise run the same passes sequentially in order.
    Each pass follows its charter in
    [references/review-dimensions.md](references/review-dimensions.md)
-   and returns raw candidate findings with evidence — no severity yet.
+   — a subagent's brief carries the charter plus its dimension's
+   resolved commands and output-reading notes, since the skill's files
+   are not in the reviewed repo — and returns raw candidate findings
+   with evidence, no severity yet.
 4. **Verify adversarially.** Re-examine every candidate — reachability,
    exploit preconditions, known false-positive patterns — and assign
    verdict and severity:

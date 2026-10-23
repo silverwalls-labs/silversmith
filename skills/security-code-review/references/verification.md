@@ -26,7 +26,10 @@ the exploit path) — whichever succeeds decides.
 1. **Shipped or not?** Is the flagged code in the artifact that ships,
    or only in tests, examples, or build tooling? Test-only usually
    caps severity — except secrets (compromised anywhere) and CI code
-   (the pipeline *is* an attack surface).
+   (the pipeline *is* an attack surface). Generated and vendored code
+   caps code-quality findings only, never secrets, dependency, or
+   CI/config findings — a vendored library's known CVE stays
+   reportable.
 2. **Reachable?** Trace the actual call path from attacker-influenced
    input to the sink. Do not assume a route is exposed — find the
    registration; do not assume input is attacker-controlled — find
@@ -72,15 +75,17 @@ severity label is an input, never the output.
 | **Serious** (data exposure, privilege escalation, SSRF into internal net) | high | medium | low |
 | **Limited** (info leak, DoS of one endpoint, missing hardening) | medium | low | info |
 
-Modifiers:
+Modifiers — applied in this order: lowering adjusters, then the
+verdict cap, floors last.
 
-- Verdict gates severity: a `plausible` finding caps one notch below
-  what the same finding would get as `confirmed`. `false-positive` has
-  no severity.
-- A committed secret starts at **high** (critical if the credential is
-  broad) regardless of where it sits — compromise is assumed. This
-  floor takes precedence over the `plausible` cap: where the two
-  collide, the floor wins.
-- Maintenance-health findings (outdated, deprecated, unmaintained)
-  without a live advisory are **low** or **info**: real, reportable,
-  not urgent.
+- Lowering adjusters — apply every one that matches, but never below
+  `info`: test-only code (step 1), vulnerable function not called
+  (step 4), and the maintenance-health ceiling (outdated, deprecated,
+  or unmaintained with no live advisory lands at **low** or **info**:
+  real, reportable, not urgent).
+- Verdict cap: a `plausible` finding then drops one further notch; at
+  `info` it stays `info` — there is no lower notch, and `info` already
+  means report-only. `false-positive` has no severity.
+- Floors win: a committed secret starts at **high** (critical if the
+  credential is broad) regardless of where it sits — compromise is
+  assumed — and overrides every adjuster and cap above.
