@@ -17,8 +17,8 @@ above).
   requirements, the critical first layer of defense.
 - **L2** — the target for most applications, especially anything
   handling sensitive data: all of L1 + L2 ≈ 70% of requirements.
-- **L3** — highest assurance (banking, health, high-value targets):
-  the remaining ~30%.
+- **L3** — highest assurance (banking, healthcare, high-value
+  targets): the remaining ~30%.
 
 Pick the level from risk (data sensitivity, user expectations,
 regulation), state it, then walk the checklist: an item fails if the
@@ -182,8 +182,8 @@ above the chosen level are recommendations, not failures.
 - [ ] **V16.4.1** (L2) Log output encoded against log injection.
 - [ ] **V16.5.1** (L2) Unexpected errors return a generic message — no
   stack traces or internal details to the consumer.
-- [ ] **V16.5.3** (L2) Failures fail securely and closed — no
-  transaction proceeds past an error in its controls.
+- [ ] **V16.5.3** (L2) The application fails securely and closed —
+  no transaction proceeds past an error in its controls.
 
 ### V17 WebRTC (if used)
 

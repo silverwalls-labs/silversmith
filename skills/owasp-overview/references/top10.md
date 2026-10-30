@@ -6,7 +6,9 @@ checked 2026-09-26. If a newer edition exists, it wins; update this file.
 Category links go to the official 2025 category page; the last column
 is the OWASP Cheat Sheet with the fix patterns. The per-category
 cheat-sheet index lives at
-[cheatsheetseries.owasp.org/IndexTopTen.html](https://cheatsheetseries.owasp.org/IndexTopTen.html).
+[cheatsheetseries.owasp.org/IndexTopTen.html](https://cheatsheetseries.owasp.org/IndexTopTen.html)
+(checked 2026-09-26: that index still maps categories against
+Top 10:2021).
 
 | # | Category | One-line definition | Most common mistake | Fix pattern | Cheat sheet |
 |---|---|---|---|---|---|

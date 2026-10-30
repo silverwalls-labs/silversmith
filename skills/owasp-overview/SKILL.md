@@ -30,8 +30,9 @@ every violation, even ones you were not asked about.
   [references/](references/). Fetch the newer edition from the
   official index linked in the reference file and assess against it;
   if it cannot be fetched, assess against the documented edition and
-  state the staleness explicitly. NEVER guess unseen category names
-  or IDs. Either way, note that this skill needs updating.
+  state the staleness explicitly. In both cases, NEVER guess unseen
+  category names or IDs, and note that this skill's references need
+  updating.
 - **MUST map every finding to a standard identifier** — a Top 10
   category (A01–A10), an API Top 10 category (API1–API10), or an ASVS
   requirement ID (Vx.y.z). An unmapped finding is an opinion, not an
@@ -42,7 +43,7 @@ every violation, even ones you were not asked about.
   expectations, regulatory context), not a default. L1 is the floor
   for anything in production.
 - **NEVER present the condensed ASVS excerpt as a full audit.** It is
-  a triage checklist (~60 of 345 requirements); a compliance claim
+  a triage checklist (60 of 345 requirements); a compliance claim
   requires the full standard, linked from the reference.
 - **MUST assess API surfaces against the API Top 10 as well** — the
   general Top 10 alone misses API-specific failure modes (object-level
@@ -50,7 +51,7 @@ every violation, even ones you were not asked about.
 - **MUST run the threat-modeling prompt in
   [references/threat-modeling.md](references/threat-modeling.md) on
   any new feature or architectural change** before reviewing its code
-  — a design flaw found in code review is found late.
+  — a design flaw caught in code review is caught too late.
 - **MUST cite the relevant OWASP cheat sheet for each finding's fix**
   rather than inventing remediation guidance; each reference table
   carries the per-topic link.
