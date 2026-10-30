@@ -99,10 +99,12 @@ and flag every violation, even ones you were not asked about.
    [references/scanners.md](references/scanners.md). Probing, install
    proposals, and consent happen here, once — passes receive the
    resolved modes and commands and never re-probe, propose, or ask.
-3. **Fan out the dimensions.** If the harness supports spawning
-   subagents, run the four passes in parallel, one focused agent per
-   dimension; otherwise run the same passes sequentially in order.
-   Each pass follows its charter in
+3. **Fan out the dimensions.** Launch one pass per dimension — in
+   parallel as subagents where the harness supports it, sequentially
+   otherwise — except a tool dimension resolved `skipped`: it is not
+   launched, and its reason is recorded in the report's dimension
+   status instead (the manual-review pass always launches). Each
+   pass follows its charter in
    [references/review-dimensions.md](references/review-dimensions.md)
    — a subagent's brief carries the charter plus its dimension's
    resolved commands and output-reading notes, since the skill's files

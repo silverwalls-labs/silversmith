@@ -32,9 +32,9 @@ needs network, and **sends metrics to semgrep.dev** (machine id,
 pseudoanonymized project hash) — it refuses `--metrics=off`. Named
 registry rulesets do not: on a private repo prefer a named ruleset
 such as `--config p/security-audit --metrics=off` (fetches rules,
-sends no metrics) or a local ruleset, and treat `auto` as off-host
-data (the consent rule in the main skill). Offline, point `--config`
-at a vendored ruleset or run the dimension manually. Without
+sends no metrics), and treat `auto` as off-host data (the consent
+rule in the main skill). Offline, point `--config` at a ruleset
+outside the reviewed tree or run the dimension manually. Without
 `--error` these invocations exit 0 even when findings exist, so a
 nonzero exit means the scan itself failed (2 fatal, 7 bad config) —
 fall back to manual mode instead of treating the failure as output.
@@ -43,6 +43,18 @@ and a locally resolvable `<base>` — it handles dirty worktrees fine —
 so when `<base>` does not resolve (shallow clone) or there is no
 checkout, run the tree scan and keep only findings in changed files
 instead of dropping to manual.
+
+Scan policy is reviewer-owned, never diff-owned: a ruleset vendored
+into the repo, a local ruleset path, and `.semgrepignore` are all
+files the PR under review can edit — a diff that weakens a rule or
+adds an ignore entry suppresses exactly the code it introduces. So
+never point `--config` at a ruleset inside the reviewed tree. The
+same goes for target selection: semgrep consults the project's
+`.semgrepignore` when picking targets, and the only flags that
+disable it are internal and unstable — the control is review-side.
+Every `.semgrepignore` or ruleset change in the diff is itself a
+candidate finding (config surface), and when it excluded code, the
+coverage note records degraded coverage — never a clean pass.
 
 ## Dependency audit — known vulnerabilities
 
@@ -96,8 +108,29 @@ The second axis has no single scanner; combine:
 |---|---|
 | Detect | `gitleaks version` — needs **≥ 8.19.1**: the `git`/`dir` subcommands landed in 8.19.0 but only work from 8.19.1; older 8.x has only the deprecated `detect` |
 | Install | `brew install gitleaks` |
-| Full history | `gitleaks git . --redact --report-format json --report-path <out>` |
-| Working tree | `gitleaks dir . --redact --report-format json --report-path <out>` — files on disk, no history at all |
+| Full history | `gitleaks git . --config <trusted> --gitleaks-ignore-path <tmp> --ignore-gitleaks-allow --redact --report-format json --report-path <out>` |
+| Working tree | `gitleaks dir . --config <trusted> --gitleaks-ignore-path <tmp> --ignore-gitleaks-allow --redact --report-format json --report-path <out>` — files on disk, no history at all |
+
+Scan policy is reviewer-owned here too. Gitleaks resolves config in
+the order `--config`, `GITLEAKS_CONFIG`, `GITLEAKS_CONFIG_TOML`,
+`(target path)/.gitleaks.toml`, then the embedded default — the
+target-tree step means a `.gitleaks.toml` the diff adds or edits can
+disable the rule that would catch the diff's own secret. Pass
+`--config` pointing outside the reviewed tip: when the repo keeps
+its own policy, extract the base ref's copy into `<tmp>`
+(`git show <base>:.gitleaks.toml`); when neither base nor tip has
+one, the embedded default governs untouched — but a
+`.gitleaks.toml` the diff introduces is itself a candidate finding,
+and the scan may not run against it: use a reviewer-owned config
+(the gitleaks default config fetched at a pinned ref) or the manual
+patterns below. Point `--gitleaks-ignore-path` at `<tmp>` (outside
+the repo) so a diff-added `.gitleaksignore` cannot baseline-suppress
+its own fingerprints, and pass `--ignore-gitleaks-allow` (probe
+`gitleaks git --help`; older builds lack it) so `# gitleaks:allow`
+comments in the target cannot suppress findings — without the flag,
+grep the diff for them and record the dimension degraded if any
+appear. Never record a tool-backed pass whose policy the diff
+controlled.
 
 Exit codes: 0 is clean; **1 means leaks found _or_ the scan errored**
 (126 is only an unknown flag). On exit 1 read the report and stderr

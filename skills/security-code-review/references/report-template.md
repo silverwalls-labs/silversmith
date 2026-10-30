@@ -29,6 +29,7 @@ of the value: a filed report must not become the next leak.
 | Static analysis | tool-backed | semgrep 1.x | |
 | Dependency audit | degraded | — | no network; lockfile-only |
 | Secrets | tool-backed | gitleaks 8.24 | full history (subsumes the diff range) |
+| Static analysis | skipped | — | docs-only diff: no code to scan |
 | Manual review | manual | — | always manual |
 
 ## Findings
@@ -41,9 +42,9 @@ of the value: a filed report must not become the next leak.
 
 ## Dismissed
 
-| ID | Source | Location | Reasoning |
-|---|---|---|---|
-| SCR-7 | semgrep <rule-id> | file:line @ ref | framework-mitigated: template auto-escapes on this path (verified active) |
+| ID | Source | Verdict | Location | Reasoning |
+|---|---|---|---|---|
+| SCR-7 | semgrep <rule-id> | false-positive | file:line @ ref | framework-mitigated: template auto-escapes on this path (verified active) |
 ```
 
 ## Finding record

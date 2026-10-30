@@ -15,10 +15,11 @@ running sequentially, execute the charters inline.
 - **Inputs:** the scope header from flow step 1 (ref/diff, scan scope
   — diff- or tree-scoped — file list, manifests, blast radius) and the
   dimension's resolved mode from flow step 2 (tool-backed, manual, or
-  degraded, with the tool name if any) plus the off-host consent
-  decisions. Probing, installs, and consent already happened there —
-  the pass never redoes them, never asks, and makes no off-host call
-  outside what was consented.
+  degraded, with the tool name if any — a dimension resolved
+  `skipped` launches no pass, so no brief exists for it) plus the
+  off-host consent decisions. Probing, installs, and consent already
+  happened there — the pass never redoes them, never asks, and makes
+  no off-host call outside what was consented.
 - **Output:** a list of *candidate* findings — each with location,
   description, and raw evidence (scanner excerpt, code quote, or traced
   flow). **No severity, no verdict** — the verification pass owns both.
@@ -64,12 +65,17 @@ a tree-scoped review):
   candidate carrying the advisory id, the affected version range, the
   installed version, and — when the advisory names vulnerable
   functions — whether the project calls them. Manual mode (tool
-  unavailable, network up, advisory lookups consented): look up each
-  direct dependency at its pinned version against the advisory
-  sources (osv.dev, GitHub advisories, the registry's advisory page),
-  diff-touched manifests first. Offline, or lookups declined: inspect
-  the lockfile instead (deprecation markers, ancient pins) and mark
-  the axis degraded.
+  unavailable, network up, advisory lookups consented): enumerate
+  the packages each touched lockfile pins — transitive included,
+  not just direct — and look each up at its pinned version against
+  the advisory sources (osv.dev, GitHub advisories, the registry's
+  advisory page), diff-added and diff-bumped packages first. When
+  the graph is too large to look up exhaustively, cover direct
+  dependencies plus the transitive ones on a security boundary
+  (parsers, crypto, auth middleware — the maintenance axis's list)
+  and record transitive coverage as degraded in the coverage note.
+  Offline, or lookups declined: inspect the lockfile instead
+  (deprecation markers, ancient pins) and mark the axis degraded.
 - **Maintenance health:** outdated majors, deprecated packages,
   archived or years-stale upstreams, and unmaintained packages in the
   transitive tree that sit on a security boundary (parsers, crypto,
