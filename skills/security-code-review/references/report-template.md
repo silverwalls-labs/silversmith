@@ -29,8 +29,11 @@ of the value: a filed report must not become the next leak.
 | Static analysis | tool-backed | semgrep 1.x | |
 | Dependency audit | degraded | — | no network; lockfile-only |
 | Secrets | tool-backed | gitleaks 8.24 | full history (subsumes the diff range) |
-| Static analysis | skipped | — | docs-only diff: no code to scan |
 | Manual review | manual | — | always manual |
+
+One row per dimension: a `skipped` dimension replaces its row
+(`| Static analysis | skipped | — | docs-only diff: no code to scan
+|` — the reason in Notes), never adds a second one.
 
 ## Findings
 
