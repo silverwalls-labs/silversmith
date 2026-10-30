@@ -1,8 +1,9 @@
 # Disclosure checklist
 
-Work through this checklist in order. Do not skip steps — each one
-gates the next. Do not disclose externally before containment and legal
-sign-off.
+Work through this checklist in order, but assess the compliance
+clocks in section 3 at triage: required regulatory notices go out on
+their own deadlines and are not gated on the earlier steps. Do not
+disclose publicly before containment and legal sign-off.
 
 ## 1. Vulnerability in your code
 
@@ -51,15 +52,21 @@ sign-off.
 
 ## 3. Compliance clocks
 
-These are hard deadlines. Missing them is a separate compliance
-failure independent of the incident itself.
+These are deadlines to track from the moment of awareness — assess
+them at triage, work them in parallel with containment, and treat a
+missed clock as a separate compliance failure independent of the
+incident itself.
 
 ### GDPR (personal data breaches)
 
-- [ ] **72 hours** from becoming aware of a personal data breach to
-  notify the supervisory authority (Art. 33 GDPR). "Becoming aware"
-  is when you have a reasonable degree of certainty — not when the
-  investigation is complete.
+- [ ] **Without undue delay and, where feasible, within 72 hours**
+  from becoming aware of a personal data breach, notify the
+  supervisory authority (Art. 33 GDPR). "Becoming aware" is when
+  you have a reasonable degree of certainty — not when the
+  investigation is complete. If the notice comes later than 72
+  hours, document the reasons. No notice is required if the breach
+  is unlikely to result in a risk to the rights and freedoms of
+  data subjects.
 - [ ] **Without undue delay** to notify affected data subjects if the
   breach is likely to result in a high risk to their rights and
   freedoms (Art. 34 GDPR).
@@ -86,9 +93,11 @@ failure independent of the incident itself.
 
 ## 4. External communication
 
-- [ ] **Legal sign-off** before any external disclosure — legal
+- [ ] **Legal review runs in parallel, not as a gate** — legal
   reviews the advisory text, customer notification, and public
-  statement.
+  statement while containment proceeds. Public disclosure waits for
+  legal sign-off; required regulatory notices go out by their
+  deadlines regardless.
 - [ ] **Single spokesperson** — one person or team drafts and sends
   all external communication. No ad-hoc statements.
 - [ ] **Factual, no speculation** — disclose what happened, what

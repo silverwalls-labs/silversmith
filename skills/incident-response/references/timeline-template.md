@@ -33,7 +33,8 @@ current; anyone on the response team can add rows.
 - **Never delete rows.** If an action was reversed or a classification
   changed, add a new row — the history of changes is the record.
 - **One action per row.** "Rotated secret and blocked IP" is two rows.
-- **Actor is a person**, not a system. If an automated system took the
-  action, name the person who triggered or approved it.
+- **Actor is the person or system that acted.** If an automated
+  system took the action, name it as the actor and record the person
+  who triggered or approved it in Notes — when one exists.
 - **Include links** to PRs, commits, advisories, and alerts in the
   Notes column — the postmortem author will thank you.

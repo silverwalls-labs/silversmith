@@ -27,8 +27,9 @@ violation, even ones you were not asked about.
 - **MUST declare an incident owner immediately.** An incident without
   a declared owner drifts. The owner drives the timeline, not the fix.
 - **MUST page by severity:** SEV0/SEV1 page on-call immediately;
-  SEV2/SEV3 can wait for business hours. Know the escalation path
-  before you need it.
+  SEV2 pages on-call within the rubric's four-hour triage window —
+  including after-hours reports; SEV3 can wait for business hours.
+  Know the escalation path before you need it.
 - **MUST triage fast:** confirm the report, assess scope, declare
   (or stand down) within the rubric's response times. A slow triage
   is the first failure.
@@ -57,14 +58,20 @@ violation, even ones you were not asked about.
   SEV0/SEV1, every 2 hours for SEV2, daily for SEV3. Silence is
   scarier than bad news.
 - **MUST know the compliance clocks before the incident:** GDPR
-  requires notification to the supervisory authority within 72 hours
-  of becoming aware of a personal data breach; customer agreements,
-  commonly audited under SOC 2, set their own notification clocks.
-  Missing the clock is a separate compliance failure.
-- **MUST NOT disclose externally before containment and legal
+  requires notice without undue delay and, where feasible, within
+  72 hours of becoming aware of a personal data breach — with
+  documented reasons if the window is missed, and no notice required
+  when the breach is unlikely to result in a risk; customer
+  agreements, commonly audited under SOC 2, set their own
+  notification clocks. Missing the clock is a separate compliance
+  failure.
+- **MUST NOT disclose publicly before containment and legal
   sign-off.** Premature disclosure can tip off an attacker and
-  create legal exposure. Internal awareness first, external
-  disclosure on the compliance schedule.
+  create legal exposure. Internal awareness first, public
+  disclosure on the compliance schedule. Required regulatory
+  notices (GDPR, PCI, customer contracts) are not gated on this —
+  assess their clocks at triage, run legal review in parallel, and
+  send them by their deadlines.
 - **MUST brief stakeholders (exec, legal, support) on a schedule,
   not on demand.** One writer, one channel, one cadence.
 
