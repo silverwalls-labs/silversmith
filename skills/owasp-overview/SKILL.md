@@ -54,7 +54,8 @@ every violation, even ones you were not asked about.
   — a design flaw caught in code review is caught too late.
 - **MUST cite the relevant OWASP cheat sheet for each finding's fix**
   rather than inventing remediation guidance; each reference table
-  carries the per-topic link.
+  carries the per-topic link — the official category page where no
+  dedicated cheat sheet exists.
 - **NEVER downgrade a finding because it is not in a Top 10.** The
   Top 10 lists are awareness rankings, not an exhaustive taxonomy;
   ASVS is the closer-to-exhaustive net.
@@ -65,7 +66,7 @@ Open only the reference the task needs:
 
 | Task | Reference |
 |---|---|
-| Security posture review of a web application | All four, in the sequence below |
+| Security posture review of a web application | Threat model, Top 10, and ASVS; add the API Top 10 when an API surface exists (sequence below) |
 | Codebase mapping against a verification level | [references/asvs.md](references/asvs.md) |
 | API design or review (REST, GraphQL, service-to-service) | [references/api-top10.md](references/api-top10.md) |
 | Threat-modeling a new feature or design | [references/threat-modeling.md](references/threat-modeling.md) |
