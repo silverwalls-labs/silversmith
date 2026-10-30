@@ -8,8 +8,10 @@ description: Security incident response. Use when triaging or responding to a se
 Enforce a structured response to security incidents: severity-based
 triage, containment before root cause, evidence preservation,
 compliance-driven communication, coordinated disclosure, and blameless
-postmortems. This is the operational counterpart to supply-chain and
-secrets-handling skills — those prevent, this one responds.
+postmortems. This is the operational counterpart to the prevention
+skills in this collection (code-injection-prevention, npm-publish,
+security-code-review, vulnerability-triage) — those prevent, this one
+responds.
 
 ## Rules
 
@@ -27,9 +29,9 @@ violation, even ones you were not asked about.
 - **MUST page by severity:** SEV0/SEV1 page on-call immediately;
   SEV2/SEV3 can wait for business hours. Know the escalation path
   before you need it.
-- **MUST triage in minutes, not hours:** confirm the report, assess
-  scope, declare (or stand down) fast. A slow triage is the first
-  failure.
+- **MUST triage fast:** confirm the report, assess scope, declare
+  (or stand down) within the rubric's response times. A slow triage
+  is the first failure.
 
 ### Contain & eradicate
 
@@ -56,9 +58,9 @@ violation, even ones you were not asked about.
   scarier than bad news.
 - **MUST know the compliance clocks before the incident:** GDPR
   requires notification to the supervisory authority within 72 hours
-  of becoming aware of a personal data breach; SOC 2 requires timely
-  notification per customer agreements. Missing the clock is a
-  separate compliance failure.
+  of becoming aware of a personal data breach; customer agreements,
+  commonly audited under SOC 2, set their own notification clocks.
+  Missing the clock is a separate compliance failure.
 - **MUST NOT disclose externally before containment and legal
   sign-off.** Premature disclosure can tip off an attacker and
   create legal exposure. Internal awareness first, external
@@ -78,8 +80,8 @@ violation, even ones you were not asked about.
 - **MUST NOT silently patch a disclosed vulnerability without a
   record.** The changelog entry and security advisory are the evidence
   of response.
-- **MUST keep a disclosure template ready.** The middle of an incident
-  is the wrong time to draft one — use the template in
+- **MUST keep a disclosure plan ready.** The middle of an incident
+  is the wrong time to draft one — use the checklist in
   [references/disclosure-checklist.md](references/disclosure-checklist.md).
 
 ### Postmortem
@@ -94,8 +96,9 @@ violation, even ones you were not asked about.
 - **Every action item MUST have an owner and a due date.** Track to
   closure. An action item without an owner is a wish.
 - **MUST publish the postmortem internally.** For major incidents
-  (SEV0/SEV1), publish a public write-up. The postmortem is the
-  artifact that makes the next incident shorter.
+  (SEV0/SEV1), publish a public write-up where legal and disclosure
+  policy allow. The postmortem is the artifact that makes the next
+  incident shorter.
 
 ## Incident flow
 
