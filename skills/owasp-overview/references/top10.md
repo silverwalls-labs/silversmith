@@ -1,7 +1,9 @@
 # OWASP Top 10 — quick reference
 
 **Edition: Top 10:2025** ([top10.owasp.org/2025](https://top10.owasp.org/2025/)) —
-checked 2026-09-26. If a newer edition exists, it wins; update this file.
+checked 2026-09-26. If a newer edition exists, it wins; update this
+file. Newer editions are published on the project page
+([owasp.org/Top10](https://owasp.org/Top10/)).
 
 Category links go to the official 2025 category page; the last column
 is the OWASP Cheat Sheet with the fix patterns. The per-category

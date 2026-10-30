@@ -2,7 +2,8 @@
 
 **Edition: API Security Top 10 2023**
 ([api-security.owasp.org](https://api-security.owasp.org/)) — checked
-2026-09-26. Category links go to the official 2023 category page.
+2026-09-26. Newer editions, when published, are announced on that
+project page. Category links go to the official 2023 category page.
 
 Apply this to every API surface (REST, GraphQL, gRPC gateways,
 service-to-service) *in addition to* the general Top 10

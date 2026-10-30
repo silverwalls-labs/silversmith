@@ -2,7 +2,9 @@
 
 **Edition: ASVS 5.0.0** (May 2025 —
 [github.com/OWASP/ASVS/tree/v5.0.0/5.0](https://github.com/OWASP/ASVS/tree/v5.0.0/5.0)) —
-checked 2026-09-26. Requirement texts below are condensed; the ID is
+checked 2026-09-26. Newer editions are published at
+[github.com/OWASP/ASVS/releases](https://github.com/OWASP/ASVS/releases).
+Requirement texts below are condensed; the ID is
 authoritative — quote the full text from the standard when reporting.
 
 This is a **triage excerpt: 60 of 345 requirements**, chosen for

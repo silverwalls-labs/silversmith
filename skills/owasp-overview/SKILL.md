@@ -53,9 +53,10 @@ every violation, even ones you were not asked about.
   any new feature or architectural change** before reviewing its code
   — a design flaw caught in code review is caught too late.
 - **MUST cite the relevant OWASP cheat sheet for each finding's fix**
-  rather than inventing remediation guidance; each reference table
-  carries the per-topic link — the official category page where no
-  dedicated cheat sheet exists.
+  rather than inventing remediation guidance. The Top 10 and API
+  tables carry the per-topic link — the official category page where
+  no dedicated cheat sheet exists; for an ASVS finding, cite the
+  full requirement text from the standard (the ID is authoritative).
 - **NEVER downgrade a finding because it is not in a Top 10.** The
   Top 10 lists are awareness rankings, not an exhaustive taxonomy;
   ASVS is the closer-to-exhaustive net.
@@ -91,6 +92,12 @@ wherever an API surface exists.
   editions silently within one assessment.
 - **Self-contained:** this skill references only its own files and
   official OWASP sources; it does not depend on any other skill.
+- **Related skills:** for concrete fixes, route to the targeted
+  skills where they exist — injection classes to
+  [code-injection-prevention](../code-injection-prevention/SKILL.md).
+  Dedicated secrets-handling and dependency-supply-chain skills are
+  still open work (issues #5 and #10); until they land, the
+  cheat-sheet links in the reference tables are the fix references.
 - **Not a scanner:** these are review checklists for human/agent
   judgment. They complement SAST/DAST/SCA tooling, they do not
   replace it — nor does a green scan replace them.
