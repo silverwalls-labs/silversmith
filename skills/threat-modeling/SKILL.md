@@ -20,10 +20,11 @@ feature or an existing model, walk this list top to bottom and flag
 every violation, even ones you were not asked about.
 
 - **MUST threat-model new features, new data flows, and architecture
-  changes — NOT every PR.** A one-line bugfix doesn't need a model; a
-  new service that handles user data does. Model when a trigger fires:
-  new external boundary, new data class (PII, secrets, payment), new
-  trust boundary, new third-party integration, or new privileged role.
+  changes when a trigger fires — NOT every PR.** A one-line bugfix
+  doesn't need a model; a new service that handles user data does. Model
+  when a trigger fires: new external boundary, new data class (PII,
+  secrets, payment), new trust boundary, new third-party integration,
+  or new privileged role.
 - **MUST keep the effort proportional:** a 30-minute model for a small
   feature, a full session for a new service. NEVER let the ceremony be
   the reason no model exists.
@@ -49,11 +50,12 @@ every violation, even ones you were not asked about.
   without a reason, an owner, and an expiry — an accepted risk with no
   owner and no expiry is just an untracked risk.
 - **MUST produce a tracked threat list** (issues or a register), each
-  entry with asset, threat, ranking, mitigation, owner, status. A model
-  that lives in a slide deck and is never updated is theater.
-- **MUST link each threat to the control that mitigates it and to the
-  code/config that implements the control**, so the register stays
-  verifiable against the codebase.
+  entry with asset, threat, ranking, mitigation or acceptance, owner,
+  status. A model that lives in a slide deck and is never updated is
+  theater.
+- **MUST link each mitigated threat to the control that mitigates it
+  and to the code/config that implements the control**, so the register
+  stays verifiable against the codebase.
 - **MUST store the model next to the code** (e.g.
   `docs/threat-models/<feature>.md`) so it is discoverable and
   versioned with the architecture it describes.
@@ -72,7 +74,7 @@ every violation, even ones you were not asked about.
    prevent/detect/respond mitigations with owners, or accept with
    reason + owner + expiry.
 5. **Record the register** at `docs/threat-models/<feature>.md` (or as
-   tracked issues), linking each threat to its control and
+   tracked issues), linking each mitigated threat to its control and
    implementation.
 6. **Revisit on architecture change;** close threats whose feature or
    boundary is gone. A worked end-to-end pass:

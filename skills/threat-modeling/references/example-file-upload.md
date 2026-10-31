@@ -14,7 +14,7 @@ impact, and ends mitigated or explicitly accepted.
 | **Status** | active |
 
 Trigger check: new external boundary (users send us bytes), new data
-class (user-generated files), new third-party-ish flow (cloud object
+class (user-generated files), new third-party integration (cloud object
 storage) → a model is warranted.
 
 ## Assets
